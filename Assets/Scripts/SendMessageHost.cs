@@ -17,22 +17,21 @@ public class SendMessageHost : MonoBehaviour
     private byte[] data;
     public void Send()
     {
-        if(createS.isUDP)
-        {
-            Thread sendthread = new Thread(SendM);
-            string messageString = "-Host: " + message.text;
 
-            data = new byte[256];
-            data = Encoding.ASCII.GetBytes(messageString);
+        Thread sendthread = new Thread(SendM);
+        string messageString = "-Host: " + message.text;
+
+        data = new byte[256];
+        data = Encoding.ASCII.GetBytes(messageString);
 
 
-            createS.recData = messageString;
-            createS.recTrue = true;
-            createS.messageSent = true;
+        createS.recData = messageString;
+        createS.recTrue = true;
+        createS.messageSent = true;
 
-            sendthread.Start();
-        }
+        sendthread.Start();
     }
+
     void SendM()
     {
         createS.newSocket.SendTo(data, data.Length, SocketFlags.None, createS.ipepClient);

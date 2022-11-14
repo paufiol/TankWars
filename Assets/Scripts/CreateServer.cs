@@ -29,7 +29,6 @@ public class CreateServer : MonoBehaviour
 
     [HideInInspector] public EndPoint ipepClient;
 
-    [HideInInspector] public bool isUDP = false;
     [HideInInspector] public Thread recthread;
 
     void Start()
@@ -55,7 +54,6 @@ public class CreateServer : MonoBehaviour
         message.text = " Server created with IP: " + GetLocalIPv4();
         canvas.GetComponent<Canvas>().enabled = false;
         textCanvas.GetComponent<Canvas>().enabled = true;
-        isUDP = true;
     }
 
     void Update()

@@ -13,14 +13,12 @@ using System.Linq;
 public class SendMessage : MonoBehaviour
 {
     public JoinServer joinS;
-    public JoinServerTCP joinSTCP;
     public Text message;
 
     private byte[] data;
     public void Send()
     {
-        if (joinS.isUDP)
-        {
+
             Thread sendthread = new Thread(SendM);
             string messageString = "-" + joinS.username.text + ": " + message.text;
             data = new byte[256];
@@ -31,17 +29,6 @@ public class SendMessage : MonoBehaviour
             joinS.messageSent = true;
 
             sendthread.Start();
-        }
-        else
-        {
-            string messageString = message.text;
-            data = new byte[256];
-            Debug.Log("You Sent: " + messageString);
-            data = Encoding.ASCII.GetBytes(messageString);
-
-            Thread sendthread = new Thread(SendMTCP);
-            sendthread.Start();
-        }
         
     }
     void SendM()
@@ -50,12 +37,5 @@ public class SendMessage : MonoBehaviour
         Debug.Log("Message sent");
     }
 
-    void SendMTCP()
-    {
-
-        joinSTCP.newSocket.Send(data, data.Length, SocketFlags.None);
-
-        Debug.Log("Message sent");
-    }
 
 }

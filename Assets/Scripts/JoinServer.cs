@@ -30,7 +30,6 @@ public class JoinServer : MonoBehaviour
 
     [HideInInspector] public bool messageSent = false;
 
-    [HideInInspector] public bool isUDP = false;
 
     private bool joined = false;
 
@@ -64,7 +63,6 @@ public class JoinServer : MonoBehaviour
         message.text = "Server joined";
         canvasJoin.GetComponent<Canvas>().enabled = false;
         textCanvas.GetComponent<Canvas>().enabled = true;
-        isUDP = true;
     }
 
     void Update()
