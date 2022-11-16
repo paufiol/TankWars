@@ -206,7 +206,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 5.042463
+  orthographic size: 5.4058867
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -570,8 +570,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1476895064}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.0069, y: -4.2933, z: 0}
-  m_LocalScale: {x: 21.2937, y: 1.5334, z: 1}
+  m_LocalPosition: {x: 0.0069, y: -4.483, z: 0}
+  m_LocalScale: {x: 21.2937, y: 1.9134654, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 1
@@ -720,6 +720,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tank: {fileID: 1218723914}
+  barrelEnd: {fileID: 212847313}
+  bulletPrefab: {fileID: 6812853383755138604, guid: 730d35e26d6e7de4193333fc9e4adc81, type: 3}
 --- !u!1 &1562280775
 GameObject:
   m_ObjectHideFlags: 0
