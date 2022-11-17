@@ -4,10 +4,16 @@ using UnityEngine;
 
 public class TankControls : MonoBehaviour
 {
-    
-    //public float minAngle = 90f;
-    //public float maxAngle = 220f;
-    
+    private float maxHealth = 100;
+    private float currentHealth;
+
+    [SerializeField] private HealthBar healthBar;
+    private void Start()
+    {
+        currentHealth = maxHealth;
+        healthBar.UpdateHealthBar(maxHealth, currentHealth);
+    }
+
     // Update is called once per frame
     void FixedUpdate()
     {
@@ -17,5 +23,14 @@ public class TankControls : MonoBehaviour
         movement *= Time.deltaTime;
         transform.Translate(movement);
 
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.tag == "Bullet")
+        {
+            currentHealth -= collision.gameObject.GetComponent<BulletLogic>().damage;
+            healthBar.UpdateHealthBar(maxHealth, currentHealth);
+        }
     }
 }

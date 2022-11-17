@@ -5,6 +5,7 @@ using UnityEngine;
 public class BulletLogic : MonoBehaviour
 {
     private float speed = 10f;
+    [HideInInspector] public float damage = 25;
 
     // Update is called once per frame
     void FixedUpdate()
