@@ -31,6 +31,10 @@ public class CreateServer : MonoBehaviour
 
     [HideInInspector] public Thread recthread;
 
+    //Tank and spawn
+    public GameObject tankPrefab;
+    public GameObject spawn;
+
     void Start()
     {
         textCanvas.GetComponent<Canvas>().enabled = false;
@@ -54,6 +58,8 @@ public class CreateServer : MonoBehaviour
         message.text = " Server created with IP: " + GetLocalIPv4();
         canvas.GetComponent<Canvas>().enabled = false;
         textCanvas.GetComponent<Canvas>().enabled = true;
+        GameObject hostTank = (GameObject)Instantiate(tankPrefab, spawn.transform.position,
+            transform.rotation);
     }
 
     void Update()
