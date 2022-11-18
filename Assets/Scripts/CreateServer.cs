@@ -32,13 +32,22 @@ public class CreateServer : MonoBehaviour
     [HideInInspector] public Thread recthread;
 
     byte[] data;
+    string json;
 
-
+    class tankUpdater
+    {
+        public float hp;
+        public Vector2 pos;
+        public Quaternion rot;
+    }
+    tankUpdater enemyTank;
 
     //Tank and spawn
 
     public GameObject tankPrefab;
     public GameObject spawn;
+    public GameObject enemySpawn;
+    public GameObject clientTank;
 
     void Start()
     {
@@ -48,7 +57,7 @@ public class CreateServer : MonoBehaviour
     public void Create()
     {
         data = new byte[256];
-
+        enemyTank = new tankUpdater();
 
         // Creating UDP Socket
         newSocket = new Socket(AddressFamily.InterNetwork,
@@ -65,27 +74,29 @@ public class CreateServer : MonoBehaviour
         message.text = " Server created with IP: " + GetLocalIPv4();
         canvas.GetComponent<Canvas>().enabled = false;
         textCanvas.GetComponent<Canvas>().enabled = true;
-        GameObject hostTank = (GameObject)Instantiate(tankPrefab, spawn.transform.position,
-            transform.rotation);
+
+        //GameObject hostTank = (GameObject)Instantiate(tankPrefab, spawn.transform.position,
+        //    transform.rotation);
+
+        clientTank = (GameObject)Instantiate(tankPrefab, enemySpawn.transform.position, transform.rotation);
+        SpriteRenderer sprite = clientTank.GetComponent<SpriteRenderer>();
+        sprite.color = Color.red;
     }
 
     void Update()
     {
-        //if (recTrue)
-        //{
-        //    message.text = message.text.Replace("\0", "");
-        //    message.text += "\n" + recData;
-
-
-        //    //Clear
-        //    Array.Clear(data, 0, data.Length);
-        //    recTrue = false;
-        //}
+        if (json != null)
+        {
+            enemyTank = JsonUtility.FromJson<tankUpdater>(json);
+            
+            //Debug.Log(enemyTank.pos.ToString());
+            //Debug.Log("X:" + clientTank.transform.position.x + "Y:" + clientTank.transform.position.y + "Z:" + clientTank.transform.position.z);
+            clientTank.transform.position.Set(enemyTank.pos.x, enemyTank.pos.y, 0);
+        }
     }
 
     void Rec()
     {
-
         while (true)
         {
             Debug.Log("1");
@@ -94,8 +105,9 @@ public class CreateServer : MonoBehaviour
             MemoryStream stream = new MemoryStream(data);
             BinaryReader reader = new BinaryReader(stream);
             stream.Seek(0, SeekOrigin.Begin);
-            string json = reader.ReadString();
-            Debug.Log(json);
+            json = reader.ReadString();
+
+            //Debug.Log(json);
 
             if (recData != null)
             {
@@ -116,4 +128,6 @@ public class CreateServer : MonoBehaviour
     {
         newSocket.Close();
     }
+
+
 }
