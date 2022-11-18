@@ -37,6 +37,10 @@ public class JoinServer : MonoBehaviour
 
     [HideInInspector] public Thread sendthread;
 
+    //Tank and spawn
+    public GameObject tankPrefab;
+    public GameObject spawn;
+
     class testClass
     {
         public int hp = 10;
@@ -44,6 +48,7 @@ public class JoinServer : MonoBehaviour
     }
 
     testClass tank1 = new testClass();
+
     void Start()
     {
         textCanvas.GetComponent<Canvas>().enabled = false;
@@ -51,6 +56,7 @@ public class JoinServer : MonoBehaviour
         tank1.hp = 8;
         tank1.pos.x = 0;
         tank1.pos.y = 0;
+        
     }
 
     public void Join()
@@ -76,6 +82,11 @@ public class JoinServer : MonoBehaviour
         message.text = "Server joined";
         canvasJoin.GetComponent<Canvas>().enabled = false;
         textCanvas.GetComponent<Canvas>().enabled = true;
+
+        GameObject joinTank = (GameObject)Instantiate(tankPrefab, spawn.transform.position,
+            transform.rotation);
+        SpriteRenderer sprite = joinTank.GetComponent<SpriteRenderer>();
+        sprite.color = Color.red;
     }
 
     void Update()
