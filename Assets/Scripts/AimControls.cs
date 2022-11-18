@@ -13,16 +13,19 @@ public class AimControls : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKey(KeyCode.A))
+        if(GetComponentInParent<TankControls>().isEnabled)
         {
-            transform.RotateAround(tank.transform.position, Vector3.forward, 40f * Time.deltaTime);
-        }
-        else if (Input.GetKey(KeyCode.D))
-            transform.RotateAround(tank.transform.position, -Vector3.forward, 40f * Time.deltaTime);
+            if (Input.GetKey(KeyCode.A))
+            {
+                transform.RotateAround(tank.transform.position, Vector3.forward, 40f * Time.deltaTime);
+            }
+            else if (Input.GetKey(KeyCode.D))
+                transform.RotateAround(tank.transform.position, -Vector3.forward, 40f * Time.deltaTime);
 
-        if (Input.GetKey(KeyCode.Space) && Time.time>nextShot)
-        {
-            ProjectileShoot();
+            if (Input.GetKey(KeyCode.Space) && Time.time > nextShot)
+            {
+                ProjectileShoot();
+            }
         }
     }
 

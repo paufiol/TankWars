@@ -47,7 +47,8 @@ public class CreateServer : MonoBehaviour
     public GameObject tankPrefab;
     public GameObject spawn;
     public GameObject enemySpawn;
-    public GameObject clientTank;
+
+    private List<GameObject> tankInstances = new List<GameObject>();
 
     void Start()
     {
@@ -75,23 +76,43 @@ public class CreateServer : MonoBehaviour
         canvas.GetComponent<Canvas>().enabled = false;
         textCanvas.GetComponent<Canvas>().enabled = true;
 
-        //GameObject hostTank = (GameObject)Instantiate(tankPrefab, spawn.transform.position,
-        //    transform.rotation);
+        GameObject hostTank = Instantiate(tankPrefab, spawn.transform.position,
+            transform.rotation);
+       
+        
+        //hostTankControls.isPlayer = false;
 
-        clientTank = (GameObject)Instantiate(tankPrefab, enemySpawn.transform.position, transform.rotation);
+        //TankControls isPlayer=hostTank.GetComponent<TankControls>();
+        //isPlayer.DisableTank();
+
+        tankInstances.Add(hostTank);
+
+        Debug.Log(tankInstances.Count);
+
+        GameObject clientTank = (GameObject)Instantiate(tankPrefab, enemySpawn.transform.position, transform.rotation);
         SpriteRenderer sprite = clientTank.GetComponent<SpriteRenderer>();
         sprite.color = Color.red;
+
+        tankInstances.Add(clientTank);
+
     }
 
     void Update()
     {
+        //Disable 2nd tank controls
+        if(tankInstances.Count>0)
+        {
+            tankInstances[1].GetComponent<TankControls>().isEnabled = false;
+        }
+
+
         if (json != null)
         {
             enemyTank = JsonUtility.FromJson<tankUpdater>(json);
             
             //Debug.Log(enemyTank.pos.ToString());
             //Debug.Log("X:" + clientTank.transform.position.x + "Y:" + clientTank.transform.position.y + "Z:" + clientTank.transform.position.z);
-            clientTank.transform.position.Set(enemyTank.pos.x, enemyTank.pos.y, 0);
+            tankInstances[1].transform.position.Set(enemyTank.pos.x, enemyTank.pos.y, 0);
         }
     }
 

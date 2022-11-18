@@ -8,8 +8,11 @@ public class TankControls : MonoBehaviour
     public float currentHealth;
 
     [SerializeField] private HealthBar healthBar;
+
+    [HideInInspector] public bool isEnabled;
     private void Start()
     {
+        isEnabled = true;
         currentHealth = maxHealth;
         healthBar.UpdateHealthBar(maxHealth, currentHealth);
     }
@@ -17,12 +20,14 @@ public class TankControls : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        float inputX = Input.GetAxis("Horizontal");
+        if(isEnabled)
+        {
+            float inputX = Input.GetAxis("Horizontal");
 
-        Vector2 movement = new Vector2(1f * inputX, 0);
-        movement *= Time.deltaTime;
-        transform.Translate(movement);
-
+            Vector2 movement = new Vector2(1f * inputX, 0);
+            movement *= Time.deltaTime;
+            transform.Translate(movement);
+        }
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
