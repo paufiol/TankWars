@@ -6,12 +6,12 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using System.IO;
 using UnityEngine.UI;
 using System.Linq;
 
 public class CreateServer : MonoBehaviour
 {
-
     public Text message;
     public Canvas canvas;
     public Canvas textCanvas;
@@ -22,7 +22,7 @@ public class CreateServer : MonoBehaviour
     [HideInInspector] public string hostIP;
 
     // Sockets stuff
-    private byte[] data = { };
+
     [HideInInspector] public string recData;
     [HideInInspector] public bool recTrue = false;
     [HideInInspector] public bool messageSent = false;
@@ -31,7 +31,12 @@ public class CreateServer : MonoBehaviour
 
     [HideInInspector] public Thread recthread;
 
+    byte[] data;
+
+
+
     //Tank and spawn
+
     public GameObject tankPrefab;
     public GameObject spawn;
 
@@ -43,6 +48,8 @@ public class CreateServer : MonoBehaviour
     public void Create()
     {
         data = new byte[256];
+
+
         // Creating UDP Socket
         newSocket = new Socket(AddressFamily.InterNetwork,
                                SocketType.Dgram, ProtocolType.Udp);
@@ -64,26 +71,31 @@ public class CreateServer : MonoBehaviour
 
     void Update()
     {
-        if (recTrue)
-        {
-            message.text = message.text.Replace("\0", "");
-            message.text += "\n" + recData;
+        //if (recTrue)
+        //{
+        //    message.text = message.text.Replace("\0", "");
+        //    message.text += "\n" + recData;
 
 
-            //Clear
-            Array.Clear(data, 0, data.Length);
-            recTrue = false;
-        }
+        //    //Clear
+        //    Array.Clear(data, 0, data.Length);
+        //    recTrue = false;
+        //}
     }
 
     void Rec()
     {
+
         while (true)
         {
+            Debug.Log("1");
             newSocket.ReceiveFrom(data, ref ipepClient);
-            recData = Encoding.ASCII.GetString(data);
-
-            Debug.Log(recData);
+            Debug.Log("2");
+            MemoryStream stream = new MemoryStream(data);
+            BinaryReader reader = new BinaryReader(stream);
+            stream.Seek(0, SeekOrigin.Begin);
+            string json = reader.ReadString();
+            Debug.Log(json);
 
             if (recData != null)
             {
@@ -98,5 +110,10 @@ public class CreateServer : MonoBehaviour
             .AddressList.Last(
                 f => f.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
             .ToString();
+    }
+
+    private void OnApplicationQuit()
+    {
+        newSocket.Close();
     }
 }
