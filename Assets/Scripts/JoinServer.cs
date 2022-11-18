@@ -41,21 +41,22 @@ public class JoinServer : MonoBehaviour
     public GameObject tankPrefab;
     public GameObject spawn;
 
-    class testClass
+    public GameObject joinTank;
+
+    public TankControls controls;
+
+    class tankUpdater
     {
-        public int hp = 10;
-        public Vector2 pos = new Vector2(1, 2);
+        public float hp;
+        public Vector2 pos;
+        public Quaternion rot;
     }
 
-    testClass tank1 = new testClass();
+    tankUpdater tank1 = new tankUpdater();
 
     void Start()
     {
         textCanvas.GetComponent<Canvas>().enabled = false;
-
-        tank1.hp = 8;
-        tank1.pos.x = 0;
-        tank1.pos.y = 0;
         
     }
 
@@ -83,24 +84,30 @@ public class JoinServer : MonoBehaviour
         canvasJoin.GetComponent<Canvas>().enabled = false;
         textCanvas.GetComponent<Canvas>().enabled = true;
 
-        GameObject joinTank = (GameObject)Instantiate(tankPrefab, spawn.transform.position,
+        joinTank = (GameObject)Instantiate(tankPrefab, spawn.transform.position,
             transform.rotation);
+
         SpriteRenderer sprite = joinTank.GetComponent<SpriteRenderer>();
         sprite.color = Color.red;
     }
 
     void Update()
     {
-        if (recTrue)
-        {
-            message.text = message.text.Replace("\0", "");
-            message.text += "\n" + recData;
+        //if (recTrue)
+        //{
+        //    message.text = message.text.Replace("\0", "");
+        //    message.text += "\n" + recData;
 
 
-            //Clear
-            Array.Clear(data, 0, data.Length);
-            recTrue = false;
-        }
+        //    //Clear
+        //    Array.Clear(data, 0, data.Length);
+        //    recTrue = false;
+        //}
+
+        tank1.pos.x = joinTank.transform.position.x;
+        tank1.pos.y = joinTank.transform.position.y;
+        tank1.rot = joinTank.GetComponentInChildren<Transform>().Find("Cannon").rotation;
+        tank1.hp = joinTank.GetComponent<TankControls>().GetHP();
     }
 
     void Send()
@@ -124,14 +131,14 @@ public class JoinServer : MonoBehaviour
             SerializeJson(tank1);
             Debug.Log(mem.GetBuffer().Length.ToString());
             newSocket.SendTo(mem.GetBuffer(), mem.GetBuffer().Length, SocketFlags.None, ipepServer);
-            Debug.Log("Message sent: " + tank1.hp.ToString() + " " + tank1.pos.y.ToString() + " " + tank1.pos.x.ToString());
+            Debug.Log("Message sent: " + tank1.hp.ToString() + "POS " + tank1.pos.x.ToString() + " " + tank1.pos.y.ToString() + "Turret Rot:" + tank1.rot.ToString());
 
   
 
         }
     }
 
-    void SerializeJson(testClass a)
+    void SerializeJson(tankUpdater a)
     {
 
         mem = new MemoryStream();

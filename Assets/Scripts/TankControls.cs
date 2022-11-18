@@ -5,7 +5,7 @@ using UnityEngine;
 public class TankControls : MonoBehaviour
 {
     private float maxHealth = 100;
-    private float currentHealth;
+    public float currentHealth;
 
     [SerializeField] private HealthBar healthBar;
     private void Start()
@@ -32,5 +32,10 @@ public class TankControls : MonoBehaviour
             currentHealth -= collision.gameObject.GetComponent<BulletLogic>().damage;
             healthBar.UpdateHealthBar(maxHealth, currentHealth);
         }
+    }
+
+    public float GetHP()
+    {
+        return currentHealth;
     }
 }
