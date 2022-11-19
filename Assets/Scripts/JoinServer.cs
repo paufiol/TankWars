@@ -22,7 +22,6 @@ public class JoinServer : MonoBehaviour
     private int port = 5631;
 
     // Sockets stuff
-    private byte[] data;
 
     [HideInInspector] public EndPoint ipepServer;
 
@@ -41,18 +40,16 @@ public class JoinServer : MonoBehaviour
     public GameObject tankPrefab;
     public GameObject spawn;
 
-    public GameObject joinTank;
+    [HideInInspector] public GameObject joinTank;
 
-    public TankControls controls;
-
-    class tankUpdater
+    class tankClass
     {
         public float hp;
         public Vector2 pos;
         public Quaternion rot;
     }
 
-    tankUpdater tank1 = new tankUpdater();
+    private tankClass myTankClass = new tankClass();
 
     void Start()
     {
@@ -72,8 +69,8 @@ public class JoinServer : MonoBehaviour
         // Server Endpoint
         ipepServer = new IPEndPoint(IPAddress.Parse(ipString), port);
 
-        data = new byte[1024];
-        data = Encoding.ASCII.GetBytes(usernameString);
+        //data = new byte[1024];
+        //data = Encoding.ASCII.GetBytes(usernameString);
 
         messageSent = true;
 
@@ -84,6 +81,7 @@ public class JoinServer : MonoBehaviour
         canvasJoin.GetComponent<Canvas>().enabled = false;
         textCanvas.GetComponent<Canvas>().enabled = true;
 
+        // We instantiate the tank
         joinTank = (GameObject)Instantiate(tankPrefab, spawn.transform.position,
             transform.rotation);
 
@@ -93,54 +91,28 @@ public class JoinServer : MonoBehaviour
 
     void Update()
     {
-        //if (recTrue)
-        //{
-        //    message.text = message.text.Replace("\0", "");
-        //    message.text += "\n" + recData;
-
-
-        //    //Clear
-        //    Array.Clear(data, 0, data.Length);
-        //    recTrue = false;
-        //}
-
-        tank1.pos.x = joinTank.transform.position.x;
-        tank1.pos.y = joinTank.transform.position.y;
-        tank1.rot = joinTank.GetComponentInChildren<Transform>().Find("Cannon").rotation;
-        tank1.hp = joinTank.GetComponent<TankControls>().GetHP();
+        // Each frame we actualize the content of tankClass
+        myTankClass.pos.x = joinTank.transform.position.x;
+        myTankClass.pos.y = joinTank.transform.position.y;
+        myTankClass.rot = joinTank.GetComponentInChildren<Transform>().Find("Cannon").rotation;
+        myTankClass.hp = joinTank.GetComponent<TankControls>().GetHP();
     }
 
     void Send()
     {
         while (true)
         {
-            //if (messageSent)
-            //{
-            //    newSocket.SendTo(data, data.Length, SocketFlags.None, ipepServer);
-            //    messageSent = false;
-            //}
-
-            //newSocket.ReceiveFrom(data, ref ipepServer);
-            //recData = Encoding.ASCII.GetString(data);
-
-            //if (recData != null)
-            //{
-            //    recTrue = true;
-            //}
-
-            SerializeJson(tank1);
+            // Serialize and send the data inside tankClass
+            SerializeJson(myTankClass);
             Debug.Log(mem.GetBuffer().Length.ToString());
             newSocket.SendTo(mem.GetBuffer(), mem.GetBuffer().Length, SocketFlags.None, ipepServer);
-            Debug.Log("Message sent: " + tank1.hp.ToString() + "POS " + tank1.pos.x.ToString() + " " + tank1.pos.y.ToString() + "Turret Rot:" + tank1.rot.ToString());
-
-  
+            Debug.Log("Message sent: " + myTankClass.hp.ToString() + "POS " + myTankClass.pos.x.ToString() + " " + myTankClass.pos.y.ToString() + "Turret Rot:" + myTankClass.rot.ToString());
 
         }
     }
 
-    void SerializeJson(tankUpdater a)
+    void SerializeJson(tankClass a)
     {
-
         mem = new MemoryStream();
         string json = JsonUtility.ToJson(a);
         BinaryWriter writer = new BinaryWriter(mem);

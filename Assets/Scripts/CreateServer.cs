@@ -16,7 +16,7 @@ public class CreateServer : MonoBehaviour
     public Canvas canvas;
     public Canvas textCanvas;
 
-    public Socket newSocket;
+    [HideInInspector] public Socket newSocket;
     private int port = 5631;
 
     [HideInInspector] public string hostIP;
@@ -31,23 +31,25 @@ public class CreateServer : MonoBehaviour
 
     [HideInInspector] public Thread recthread;
 
-    byte[] data;
-    string json;
+    private byte[] data;
+    private string json;
 
-    class tankUpdater
+    // We create the class where we will store all the data of the tank
+    class tankClass
     {
         public float hp;
-        public Vector2 pos;
+        public Vector3 pos;
         public Quaternion rot;
     }
-    tankUpdater enemyTank;
+
+    private tankClass enemyTank;
 
     //Tank and spawn
-
     public GameObject tankPrefab;
     public GameObject spawn;
     public GameObject enemySpawn;
 
+    // Create a list where we will store the tanks
     private List<GameObject> tankInstances = new List<GameObject>();
 
     void Start()
@@ -58,7 +60,7 @@ public class CreateServer : MonoBehaviour
     public void Create()
     {
         data = new byte[256];
-        enemyTank = new tankUpdater();
+        enemyTank = new tankClass();
 
         // Creating UDP Socket
         newSocket = new Socket(AddressFamily.InterNetwork,
@@ -76,25 +78,26 @@ public class CreateServer : MonoBehaviour
         canvas.GetComponent<Canvas>().enabled = false;
         textCanvas.GetComponent<Canvas>().enabled = true;
 
+
+        // Create the tank that will be controled by the host
         GameObject hostTank = Instantiate(tankPrefab, spawn.transform.position,
             transform.rotation);
-       
-        
+
+        tankInstances.Add(hostTank);
+
         //hostTankControls.isPlayer = false;
 
         //TankControls isPlayer=hostTank.GetComponent<TankControls>();
         //isPlayer.DisableTank();
 
-        tankInstances.Add(hostTank);
+        //Debug.Log(tankInstances.Count);
 
-        Debug.Log(tankInstances.Count);
-
+        // Create the tank that will be controled by the client
         GameObject clientTank = (GameObject)Instantiate(tankPrefab, enemySpawn.transform.position, transform.rotation);
         SpriteRenderer sprite = clientTank.GetComponent<SpriteRenderer>();
         sprite.color = Color.red;
 
         tankInstances.Add(clientTank);
-
     }
 
     void Update()
@@ -105,14 +108,13 @@ public class CreateServer : MonoBehaviour
             tankInstances[1].GetComponent<TankControls>().isEnabled = false;
         }
 
-
         if (json != null)
         {
-            enemyTank = JsonUtility.FromJson<tankUpdater>(json);
+            enemyTank = JsonUtility.FromJson<tankClass>(json);
             
-            //Debug.Log(enemyTank.pos.ToString());
-            //Debug.Log("X:" + clientTank.transform.position.x + "Y:" + clientTank.transform.position.y + "Z:" + clientTank.transform.position.z);
-            tankInstances[1].transform.position.Set(enemyTank.pos.x, enemyTank.pos.y, 0);
+            Debug.Log(enemyTank.pos.ToString());
+            Vector3 newPos = new Vector3(enemyTank.pos.x, enemyTank.pos.y, enemyTank.pos.z);
+            tankInstances[1].transform.position = newPos;
         }
     }
 
@@ -120,15 +122,14 @@ public class CreateServer : MonoBehaviour
     {
         while (true)
         {
-            Debug.Log("1");
+            // We recieve data, then deserialize it
             newSocket.ReceiveFrom(data, ref ipepClient);
-            Debug.Log("2");
             MemoryStream stream = new MemoryStream(data);
             BinaryReader reader = new BinaryReader(stream);
             stream.Seek(0, SeekOrigin.Begin);
             json = reader.ReadString();
 
-            //Debug.Log(json);
+            Debug.Log(json);
 
             if (recData != null)
             {
@@ -149,6 +150,4 @@ public class CreateServer : MonoBehaviour
     {
         newSocket.Close();
     }
-
-
 }
