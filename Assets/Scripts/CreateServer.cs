@@ -30,9 +30,12 @@ public class CreateServer : MonoBehaviour
     [HideInInspector] public EndPoint ipepClient;
 
     [HideInInspector] public Thread recthread;
+    [HideInInspector] public Thread sendthread;
 
+    MemoryStream mem = new MemoryStream();
     private byte[] data;
     private string json;
+    private string jsonClient;
 
     // We create the class where we will store all the data of the tank
     class tankClass
@@ -42,7 +45,8 @@ public class CreateServer : MonoBehaviour
         public Quaternion rot;
     }
 
-    private tankClass enemyTank;
+    private tankClass myTankClass;
+    private tankClass enemyTankClass;
 
     //Tank and spawn
     public GameObject tankPrefab;
@@ -60,7 +64,8 @@ public class CreateServer : MonoBehaviour
     public void Create()
     {
         data = new byte[256];
-        enemyTank = new tankClass();
+        enemyTankClass = new tankClass();
+        myTankClass = new tankClass();
 
         // Creating UDP Socket
         newSocket = new Socket(AddressFamily.InterNetwork,
@@ -74,6 +79,10 @@ public class CreateServer : MonoBehaviour
 
         recthread = new Thread(Rec);
         recthread.Start();
+
+        sendthread = new Thread(Send);
+        sendthread.Start();
+
         message.text = " Server created with IP: " + GetLocalIPv4();
         canvas.GetComponent<Canvas>().enabled = false;
         textCanvas.GetComponent<Canvas>().enabled = true;
@@ -100,18 +109,36 @@ public class CreateServer : MonoBehaviour
         {
             //Disable 2nd tank controls
             tankInstances[1].GetComponent<TankControls>().isEnabled = false;
+
+            // Each frame we update the content of myTankClass
+            myTankClass.pos.x = tankInstances[0].transform.position.x;
+            myTankClass.pos.y = tankInstances[0].transform.position.y;
+            myTankClass.rot = tankInstances[0].GetComponentInChildren<Transform>().Find("Cannon").rotation;
+            myTankClass.hp = tankInstances[0].GetComponent<TankControls>().GetHP();
+            Debug.Log(myTankClass.pos);
         }
 
-        if (json != null)
+        if (jsonClient != null)
         {
-            enemyTank = JsonUtility.FromJson<tankClass>(json);
+            enemyTankClass = JsonUtility.FromJson<tankClass>(jsonClient);
             
-            Debug.Log(enemyTank.pos.ToString());
-            Vector3 newPos = new Vector3(enemyTank.pos.x, enemyTank.pos.y, enemyTank.pos.z);
+            //Debug.Log(enemyTank.pos.ToString());
+            Vector3 newPos = new Vector3(enemyTankClass.pos.x, enemyTankClass.pos.y, enemyTankClass.pos.z);
             tankInstances[1].transform.position = newPos;
         }
     }
+    void Send()
+    {
+        while (true)
+        {
+            // Serialize and send the data inside tankClass
+            SerializeJson(myTankClass);
+            //Debug.Log(mem.GetBuffer().Length.ToString());
+            newSocket.SendTo(mem.GetBuffer(), mem.GetBuffer().Length, SocketFlags.None, ipepClient);
+            //Debug.Log("Message sent: " + myTankClass.hp.ToString() + "POS " + myTankClass.pos.x.ToString() + " " + myTankClass.pos.y.ToString() + "Turret Rot:" + myTankClass.rot.ToString());
 
+        }
+    }
     void Rec()
     {
         while (true)
@@ -121,9 +148,9 @@ public class CreateServer : MonoBehaviour
             MemoryStream stream = new MemoryStream(data);
             BinaryReader reader = new BinaryReader(stream);
             stream.Seek(0, SeekOrigin.Begin);
-            json = reader.ReadString();
+            jsonClient = reader.ReadString();
 
-            Debug.Log(json);
+            //Debug.Log(json);
 
             if (recData != null)
             {
@@ -139,9 +166,31 @@ public class CreateServer : MonoBehaviour
                 f => f.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
             .ToString();
     }
+    void SerializeJson(tankClass a)
+    {
+        mem = new MemoryStream();
+        json = JsonUtility.ToJson(a);
+        BinaryWriter writer = new BinaryWriter(mem);
+        writer.Write(json);
+        //Debug.Log("Serialized");
+    }
 
     private void OnApplicationQuit()
     {
-        newSocket.Close();
+        if (newSocket != null)
+        {
+            newSocket.Close();
+            newSocket = null;
+        }
+        if (recthread != null)
+        {
+            recthread.Abort();
+            recthread = null;
+        }
+        if (sendthread != null)
+        {
+            sendthread.Abort();
+            sendthread = null;
+        }
     }
 }
