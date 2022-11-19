@@ -85,6 +85,13 @@ public class CreateServer : MonoBehaviour
 
         tankInstances.Add(hostTank);
 
+        //hostTankControls.isPlayer = false;
+
+        //TankControls isPlayer=hostTank.GetComponent<TankControls>();
+        //isPlayer.DisableTank();
+
+        //Debug.Log(tankInstances.Count);
+
         // Create the tank that will be controled by the client
         GameObject clientTank = (GameObject)Instantiate(tankPrefab, enemySpawn.transform.position, transform.rotation);
         SpriteRenderer sprite = clientTank.GetComponent<SpriteRenderer>();
@@ -95,10 +102,9 @@ public class CreateServer : MonoBehaviour
 
     void Update()
     {
-        //Make sure there is at least one tank
-        if (tankInstances.Count>0)
+        //Disable 2nd tank controls
+        if(tankInstances.Count>0)
         {
-            //Disable 2nd tank controls
             tankInstances[1].GetComponent<TankControls>().isEnabled = false;
         }
 
