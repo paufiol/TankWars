@@ -648,7 +648,7 @@ MonoBehaviour:
   messageSent: 0
   tankPrefab: {fileID: 5248261022474919008, guid: 9fc71bc73759095459871755d573f2dc, type: 3}
   spawn: {fileID: 1865859663}
-  joinTank: {fileID: 5248261022474919008, guid: 9fc71bc73759095459871755d573f2dc, type: 3}
+  enemySpawn: {fileID: 1347186484}
 --- !u!114 &277872009
 MonoBehaviour:
   m_ObjectHideFlags: 0
