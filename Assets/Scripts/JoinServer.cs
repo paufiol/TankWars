@@ -39,8 +39,7 @@ public class JoinServer : MonoBehaviour
     //Tank and spawn
     public GameObject tankPrefab;
     public GameObject spawn;
-
-    [HideInInspector] public GameObject joinTank;
+    public GameObject enemySpawn;
 
     class tankClass
     {
@@ -50,6 +49,9 @@ public class JoinServer : MonoBehaviour
     }
 
     private tankClass myTankClass = new tankClass();
+
+    // Create a list where we will store the tanks
+    private List<GameObject> tankInstances = new List<GameObject>();
 
     void Start()
     {
@@ -81,21 +83,36 @@ public class JoinServer : MonoBehaviour
         canvasJoin.GetComponent<Canvas>().enabled = false;
         textCanvas.GetComponent<Canvas>().enabled = true;
 
-        // We instantiate the tank
-        joinTank = (GameObject)Instantiate(tankPrefab, spawn.transform.position,
+        // Create the tank that will be controled by the client
+        GameObject joinTank = (GameObject)Instantiate(tankPrefab, spawn.transform.position,
             transform.rotation);
-
         SpriteRenderer sprite = joinTank.GetComponent<SpriteRenderer>();
         sprite.color = Color.red;
+        tankInstances.Add(joinTank);
+
+        // Create the tank that will be controled by the host
+        GameObject hostTank = Instantiate(tankPrefab, enemySpawn.transform.position,
+            transform.rotation);
+
+        tankInstances.Add(hostTank);
     }
 
     void Update()
     {
-        // Each frame we actualize the content of tankClass
-        myTankClass.pos.x = joinTank.transform.position.x;
-        myTankClass.pos.y = joinTank.transform.position.y;
-        myTankClass.rot = joinTank.GetComponentInChildren<Transform>().Find("Cannon").rotation;
-        myTankClass.hp = joinTank.GetComponent<TankControls>().GetHP();
+        //Make sure there is at least one tank
+        if (tankInstances.Count > 0)
+        {
+            //Disable 2nd tank controls
+            tankInstances[1].GetComponent<TankControls>().isEnabled = false;
+
+            // Each frame we update the content of tankClass
+            myTankClass.pos.x = tankInstances[0].transform.position.x;
+            myTankClass.pos.y = tankInstances[0].transform.position.y;
+            myTankClass.rot = tankInstances[0].GetComponentInChildren<Transform>().Find("Cannon").rotation;
+            myTankClass.hp = tankInstances[0].GetComponent<TankControls>().GetHP();
+        }
+
+        
     }
 
     void Send()
