@@ -43,4 +43,8 @@ public class TankControls : MonoBehaviour
     {
         return currentHealth;
     }
+    public void SetHP(float newHP)
+    {
+        currentHealth = newHP;
+    }
 }

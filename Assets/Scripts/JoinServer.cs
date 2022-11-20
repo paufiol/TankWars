@@ -55,7 +55,8 @@ public class JoinServer : MonoBehaviour
     {
         public float hp;
         public Vector3 pos;
-        public Quaternion rot;
+        public Quaternion cannonRot;
+        public Vector3 cannonPos;
     }
     // create the needed classes
     private tankClass hostTankClass;
@@ -130,8 +131,10 @@ public class JoinServer : MonoBehaviour
             // Each frame we update the content of myTankClass
             myTankClass.pos.x = tankInstances[0].transform.position.x;
             myTankClass.pos.y = tankInstances[0].transform.position.y;
-            myTankClass.rot = tankInstances[0].GetComponentInChildren<Transform>().Find("Cannon").rotation;
+            myTankClass.cannonRot = tankInstances[0].GetComponentInChildren<Transform>().Find("Cannon").rotation;
             myTankClass.hp = tankInstances[0].GetComponent<TankControls>().GetHP();
+            myTankClass.cannonPos = tankInstances[0].GetComponentInChildren<Transform>().Find("Cannon").position;
+
         }
         if (jsonHost != null)
         {
@@ -140,6 +143,9 @@ public class JoinServer : MonoBehaviour
             //Debug.Log(enemyTank.pos.ToString());
             Vector3 newPos = new Vector3(hostTankClass.pos.x, hostTankClass.pos.y, hostTankClass.pos.z);
             tankInstances[1].transform.position = newPos;
+            tankInstances[1].GetComponentInChildren<Transform>().Find("Cannon").rotation = hostTankClass.cannonRot;
+            tankInstances[1].GetComponentInChildren<Transform>().Find("Cannon").position = hostTankClass.cannonPos;
+            tankInstances[1].GetComponentInChildren<TankControls>().SetHP(hostTankClass.hp);
         }
     }
 

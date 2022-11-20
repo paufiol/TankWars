@@ -48,7 +48,8 @@ public class CreateServer : MonoBehaviour
     {
         public float hp;
         public Vector3 pos;
-        public Quaternion rot;
+        public Quaternion cannonRot;
+        public Vector3 cannonPos;
     }
 
     private tankClass myTankClass;
@@ -126,8 +127,10 @@ public class CreateServer : MonoBehaviour
             // Each frame we update the content of myTankClass
             myTankClass.pos.x = tankInstances[0].transform.position.x;
             myTankClass.pos.y = tankInstances[0].transform.position.y;
-            myTankClass.rot = tankInstances[0].GetComponentInChildren<Transform>().Find("Cannon").rotation;
+            myTankClass.cannonRot = tankInstances[0].GetComponentInChildren<Transform>().Find("Cannon").rotation;
             myTankClass.hp = tankInstances[0].GetComponent<TankControls>().GetHP();
+            myTankClass.cannonPos = tankInstances[0].GetComponentInChildren<Transform>().Find("Cannon").position;
+
             //Debug.Log(myTankClass.pos);
         }
 
@@ -138,25 +141,22 @@ public class CreateServer : MonoBehaviour
             //Debug.Log(enemyTank.pos.ToString());
             Vector3 newPos = new Vector3(enemyTankClass.pos.x, enemyTankClass.pos.y, enemyTankClass.pos.z);
             tankInstances[1].transform.position = newPos;
+            tankInstances[1].GetComponentInChildren<Transform>().Find("Cannon").rotation = enemyTankClass.cannonRot;
+            tankInstances[1].GetComponentInChildren<Transform>().Find("Cannon").position = enemyTankClass.cannonPos;
+            tankInstances[1].GetComponentInChildren<TankControls>().SetHP(enemyTankClass.hp);
         }
     }
     void Send()
     {
         while (true)
         {
-            
-            mem = new MemoryStream();
-            json = JsonUtility.ToJson(myTankClass);
-            BinaryWriter writer = new BinaryWriter(mem);
-            writer.Write(json);
-            
+            SerializeJson(myTankClass);
             if (!isFirstMessage) //wait until the message with the client IP is functioning.
             {
                 oldSocket.SendTo(mem.GetBuffer(), mem.GetBuffer().Length, SocketFlags.None, ipepClient2);
 
             }
         }
-
     }
     void Rec()
     {
