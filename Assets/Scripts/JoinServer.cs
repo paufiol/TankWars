@@ -145,6 +145,10 @@ public class JoinServer : MonoBehaviour
 
     void Send()
     {
+        //Send Client IP to Host
+        string myIP = GetLocalIPv4();
+        byte[] myIPdata = Encoding.ASCII.GetBytes(myIP);
+        newSocket.SendTo(myIPdata, myIPdata.Length, SocketFlags.None, ipepServer);
 
         while (true)
         {
@@ -159,6 +163,7 @@ public class JoinServer : MonoBehaviour
 
     void Rec()
     {
+
         while (true)
         {
             // We recieve data, then deserialize it
@@ -210,6 +215,7 @@ public class JoinServer : MonoBehaviour
     }
     public string GetLocalIPv4()
     {
+        //Does not parse All possible IPs; There might be IP that are not valid (Virtual Networks)
         return Dns.GetHostEntry(Dns.GetHostName())
             .AddressList.Last(
                 f => f.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)

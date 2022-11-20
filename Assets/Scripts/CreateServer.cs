@@ -9,7 +9,7 @@ using System.Threading;
 using System.IO;
 using UnityEngine.UI;
 using System.Linq;
-
+using System.Text.RegularExpressions;
 public class CreateServer : MonoBehaviour
 {
     public Text message;
@@ -39,7 +39,9 @@ public class CreateServer : MonoBehaviour
     private byte[] data;
     private string json;
     private string jsonClient;
-    private bool clientJoined = false;
+    private bool isFirstMessage = true;
+
+    public string clientIP;
 
     // We create the class where we will store all the data of the tank
     class tankClass
@@ -80,9 +82,9 @@ public class CreateServer : MonoBehaviour
         // Server Endpoint
         IPEndPoint ipep = new IPEndPoint(IPAddress.Any, port);
         ipepClient = (EndPoint)ipep;
-        string ipString = ("192.168.1.134");
-        IPEndPoint ipep2 = new IPEndPoint(IPAddress.Parse(ipString), port2);
-        ipepClient2 = (EndPoint)ipep2;
+        
+        //IPEndPoint ipep2 = new IPEndPoint(IPAddress.Parse(clientIP), port2);
+        //ipepClient2 = (EndPoint)ipep2;
 
         // Binding Socket
         newSocket.Bind(ipep);
@@ -131,7 +133,6 @@ public class CreateServer : MonoBehaviour
 
         if (jsonClient != null)
         {
-            clientJoined = true;
             enemyTankClass = JsonUtility.FromJson<tankClass>(jsonClient);
 
             //Debug.Log(enemyTank.pos.ToString());
@@ -143,19 +144,17 @@ public class CreateServer : MonoBehaviour
     {
         while (true)
         {
-            // Serialize and send the data inside tankClass
-            //SerializeJson(myTankClass);
-            //Debug.Log(mem.GetBuffer().Length.ToString());
-            //if (clientJoined == true)
-            //{
-                mem = new MemoryStream();
-                json = JsonUtility.ToJson(myTankClass);
-                BinaryWriter writer = new BinaryWriter(mem);
-                writer.Write(json);
-                Debug.Log("Serialized");
+            
+            mem = new MemoryStream();
+            json = JsonUtility.ToJson(myTankClass);
+            BinaryWriter writer = new BinaryWriter(mem);
+            writer.Write(json);
+            
+            if (!isFirstMessage) //wait until the message with the client IP is functioning.
+            {
                 oldSocket.SendTo(mem.GetBuffer(), mem.GetBuffer().Length, SocketFlags.None, ipepClient2);
-                
-           // }
+
+            }
         }
 
     }
@@ -165,12 +164,30 @@ public class CreateServer : MonoBehaviour
         {
             // We recieve data, then deserialize it
             newSocket.ReceiveFrom(data, ref ipepClient);
-            MemoryStream stream = new MemoryStream(data);
-            BinaryReader reader = new BinaryReader(stream);
-            stream.Seek(0, SeekOrigin.Begin);
-            jsonClient = reader.ReadString();
+            
+            if (isFirstMessage)
+            {
+                //First Message is receiving the client IP, and is thus handled differently
+                clientIP = Encoding.ASCII.GetString(data);
 
-            //Debug.Log(json);
+                Debug.Log("client IP: "+ clientIP);
+                clientIP = Regex.Replace(clientIP, "\0", "");
+
+                IPEndPoint ipep2 = new IPEndPoint(IPAddress.Parse(clientIP), port2);
+                ipepClient2 = (EndPoint)ipep2;
+
+                isFirstMessage = false;
+            }
+            else
+            {
+                
+                MemoryStream stream = new MemoryStream(data);
+                BinaryReader reader = new BinaryReader(stream);
+                stream.Seek(0, SeekOrigin.Begin);
+                jsonClient = reader.ReadString();
+
+                //Debug.Log(json);
+            }
 
             if (recData != null)
             {
@@ -181,6 +198,7 @@ public class CreateServer : MonoBehaviour
 
     public string GetLocalIPv4()
     {
+        //Does not parse All possible IPs; There might be IP that are not valid (Virtual Networks)
         return Dns.GetHostEntry(Dns.GetHostName())
             .AddressList.Last(
                 f => f.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
@@ -197,6 +215,7 @@ public class CreateServer : MonoBehaviour
 
     private void OnApplicationQuit()
     {
+        //Socket & Thread CleanUp
         if (newSocket != null)
         {
             newSocket.Close();
