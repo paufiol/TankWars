@@ -419,8 +419,8 @@ MonoBehaviour:
   ip: {fileID: 416650946}
   canvasJoin: {fileID: 1010252951}
   textCanvas: {fileID: 766537609}
-  CanvasHost: {fileID: 0}
-  CanvasClient: {fileID: 0}
+  CanvasHost: {fileID: 639037958}
+  CanvasClient: {fileID: 1436288902}
   recData: 
   recTrue: 0
   messageSent: 0
@@ -442,7 +442,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Navigation:
     m_Mode: 0
-    m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
@@ -974,7 +973,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &639037955
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1034,7 +1033,6 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 0
 --- !u!223 &639037958
 Canvas:
   m_ObjectHideFlags: 0
@@ -1240,7 +1238,6 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 0
 --- !u!224 &766537612
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1419,7 +1416,6 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 0
 --- !u!224 &839852393
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1700,7 +1696,6 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 0
 --- !u!1 &1296085575
 GameObject:
   m_ObjectHideFlags: 0
@@ -1782,7 +1777,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1436288899
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1842,7 +1837,6 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 0
 --- !u!223 &1436288902
 Canvas:
   m_ObjectHideFlags: 0
@@ -1968,7 +1962,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Navigation:
     m_Mode: 0
-    m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
@@ -2233,7 +2226,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Navigation:
     m_Mode: 3
-    m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
@@ -2283,7 +2275,6 @@ MonoBehaviour:
   m_CaretBlinkRate: 0.85
   m_CaretWidth: 1
   m_ReadOnly: 0
-  m_ShouldActivateOnSelect: 1
 --- !u!114 &1556298578
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2784,7 +2775,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Navigation:
     m_Mode: 3
-    m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
@@ -2834,7 +2824,6 @@ MonoBehaviour:
   m_CaretBlinkRate: 0.85
   m_CaretWidth: 1
   m_ReadOnly: 0
-  m_ShouldActivateOnSelect: 1
 --- !u!114 &2037281249
 MonoBehaviour:
   m_ObjectHideFlags: 0

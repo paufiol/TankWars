@@ -22,8 +22,8 @@ public class JoinServer : MonoBehaviour
     public Canvas CanvasHost;
     public Canvas CanvasClient;
 
-    public Socket newSocket;
-    public Socket oldSocket;
+    public Socket sendSocket;
+    public Socket recSocket;
     private int port = 5631;
     private int port2 = 5655;
 
@@ -37,8 +37,6 @@ public class JoinServer : MonoBehaviour
 
     [HideInInspector] public bool messageSent = false;
 
-    private bool joined = false;
-
     // We declare the threads
     [HideInInspector] public Thread sendthread;
     [HideInInspector] public Thread recthread;
@@ -51,7 +49,7 @@ public class JoinServer : MonoBehaviour
 
     MemoryStream mem = new MemoryStream();
     private byte[] data;
-    private string json;
+    //private string json;
     private string jsonHost;
 
     // We create the class where we will store all the data of the tank to be turned into the smallest json possible
@@ -61,7 +59,7 @@ public class JoinServer : MonoBehaviour
         public Vector3 pos;
         public Quaternion cannonRot;
         public Vector3 cannonPos;
-        public List<Transform> bulletInstances;
+        //public List<Transform> bulletInstances;
     }
 
     // create the needed classes
@@ -87,17 +85,17 @@ public class JoinServer : MonoBehaviour
         string ipString = ip.text;
         string usernameString = "User has Joined: " + username.text;
 
-        // Creating UDP Socket
-        newSocket = new Socket(AddressFamily.InterNetwork,
+        // Creating UDP Sockets
+        sendSocket = new Socket(AddressFamily.InterNetwork,
                                SocketType.Dgram, ProtocolType.Udp);
-        oldSocket = new Socket(AddressFamily.InterNetwork,
+        recSocket = new Socket(AddressFamily.InterNetwork,
                                SocketType.Dgram, ProtocolType.Udp);
 
         // Server Endpoint
         ipepServer = new IPEndPoint(IPAddress.Parse(ipString), port);
         ipepServer2 = new IPEndPoint(IPAddress.Any, port2);
 
-        oldSocket.Bind(ipepServer2);
+        recSocket.Bind(ipepServer2);
 
         messageSent = true;
 
@@ -142,12 +140,12 @@ public class JoinServer : MonoBehaviour
 
 
             //Update list of bullets
-            myTankClass.bulletInstances = tankInstances[0].GetComponentInChildren<AimControls>().bulletInstances;
+            //myTankClass.bulletInstances = tankInstances[0].GetComponentInChildren<AimControls>().bulletInstances;
 
-            for (int i = 0; i < myTankClass.bulletInstances.Count; i++)
-            {
-                myTankClass.bulletInstances[i] = tankInstances[0].GetComponentInChildren<AimControls>().bulletInstances[i];
-            }
+            //for (int i = 0; i < myTankClass.bulletInstances.Count; i++)
+            //{
+            //    myTankClass.bulletInstances[i] = tankInstances[0].GetComponentInChildren<AimControls>().bulletInstances[i];
+            //}
 
             //VictoryScreen when a tank dies
             if(tankInstances[0].GetComponent<TankControls>().GetHP() <= 0)
@@ -171,7 +169,6 @@ public class JoinServer : MonoBehaviour
             tankInstances[1].GetComponentInChildren<Transform>().Find("Cannon").position = hostTankClass.cannonPos;
             tankInstances[1].GetComponentInChildren<TankControls>().SetHP(hostTankClass.hp);
            
-
             //Instantiate enemy bullets
             //foreach (GameObject bullet in tankInstances[1].GetComponentInChildren<AimControls>().bulletInstances)
             //{
@@ -189,13 +186,13 @@ public class JoinServer : MonoBehaviour
         //Send Client IP to Host
         string myIP = GetLocalIPv4();
         byte[] myIPdata = Encoding.ASCII.GetBytes(myIP);
-        newSocket.SendTo(myIPdata, myIPdata.Length, SocketFlags.None, ipepServer);
+        sendSocket.SendTo(myIPdata, myIPdata.Length, SocketFlags.None, ipepServer);
 
         while (true)
         {
             // Serialize and send the data inside tankClass
             SerializeJson(myTankClass);
-            newSocket.SendTo(mem.GetBuffer(), mem.GetBuffer().Length, SocketFlags.None, ipepServer);
+            sendSocket.SendTo(mem.GetBuffer(), mem.GetBuffer().Length, SocketFlags.None, ipepServer);
             //Debug.Log("Message sent: " + myTankClass.hp.ToString() + "POS " + myTankClass.pos.x.ToString() + " " + myTankClass.pos.y.ToString() + "Turret Rot:" + myTankClass.rot.ToString());
 
         }
@@ -203,11 +200,10 @@ public class JoinServer : MonoBehaviour
 
     void Rec()
     {
-
         while (true)
         {
             // We recieve data, then deserialize it
-            oldSocket.ReceiveFrom(data, ref ipepServer2);
+            recSocket.ReceiveFrom(data, ref ipepServer2);
             MemoryStream stream = new MemoryStream(data);
             BinaryReader reader = new BinaryReader(stream);
             stream.Seek(0, SeekOrigin.Begin);
@@ -229,15 +225,15 @@ public class JoinServer : MonoBehaviour
     }
     private void OnApplicationQuit()
     {
-        if (newSocket != null)
+        if (sendSocket != null)
         {
-            newSocket.Close();
-            newSocket = null;
+            sendSocket.Close();
+            sendSocket = null;
         }
-        if (oldSocket != null)
+        if (recSocket != null)
         {
-            oldSocket.Close();
-            oldSocket = null;
+            recSocket.Close();
+            recSocket = null;
         }
         if (recthread != null)
         {

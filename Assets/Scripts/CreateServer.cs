@@ -16,8 +16,8 @@ public class CreateServer : MonoBehaviour
     public Canvas canvas;
     public Canvas textCanvas;
 
-    [HideInInspector] public Socket newSocket;
-    [HideInInspector] public Socket oldSocket;
+    [HideInInspector] public Socket recSocket;
+    [HideInInspector] public Socket sendSocket;
     private int port = 5631;
     private int port2 = 5655;
 
@@ -50,7 +50,7 @@ public class CreateServer : MonoBehaviour
         public Vector3 pos;
         public Quaternion cannonRot;
         public Vector3 cannonPos;
-        public List<Transform> bulletInstances;
+        //public List<Transform> bulletInstances;
     }
 
     private tankClass myTankClass;
@@ -76,18 +76,18 @@ public class CreateServer : MonoBehaviour
         enemyTankClass = new tankClass();
         myTankClass = new tankClass();
 
-        // Creating UDP Socket
-        newSocket = new Socket(AddressFamily.InterNetwork,
+        // Creating UDP Sockets
+        recSocket = new Socket(AddressFamily.InterNetwork,
                                SocketType.Dgram, ProtocolType.Udp);
 
-        oldSocket = new Socket(AddressFamily.InterNetwork,
+        sendSocket = new Socket(AddressFamily.InterNetwork,
                               SocketType.Dgram, ProtocolType.Udp);
         // Server Endpoint
         IPEndPoint ipep = new IPEndPoint(IPAddress.Any, port);
         ipepClient = (EndPoint)ipep;
 
         // Binding Socket
-        newSocket.Bind(ipep);
+        recSocket.Bind(ipep);
 
         recthread = new Thread(Rec);
         recthread.Start();
@@ -130,26 +130,23 @@ public class CreateServer : MonoBehaviour
             myTankClass.cannonPos = tankInstances[0].GetComponentInChildren<Transform>().Find("Cannon").position;
 
             //Update list of bullets
-            myTankClass.bulletInstances = tankInstances[0].GetComponentInChildren<AimControls>().bulletInstances;
+            //myTankClass.bulletInstances = tankInstances[0].GetComponentInChildren<AimControls>().bulletInstances;
             
-            for (int i=0;i < myTankClass.bulletInstances.Count;i++)
-            {
-                myTankClass.bulletInstances[i] = tankInstances[0].GetComponentInChildren<AimControls>().bulletInstances[i];
-            }
+            //for (int i=0;i < myTankClass.bulletInstances.Count;i++)
+            //{
+            //    myTankClass.bulletInstances[i] = tankInstances[0].GetComponentInChildren<AimControls>().bulletInstances[i];
+            //}
         }
 
         if (jsonClient != null)
         {
             enemyTankClass = JsonUtility.FromJson<tankClass>(jsonClient);
 
-
-
-            Debug.Log(enemyTankClass.bulletInstances.Count);
-            if (enemyTankClass.bulletInstances.Count != 0)
-            {
-                Debug.Log(enemyTankClass.bulletInstances[0]);
-            }
-
+            //Debug.Log(enemyTankClass.bulletInstances.Count);
+            //if (enemyTankClass.bulletInstances.Count != 0)
+            //{
+            //    Debug.Log(enemyTankClass.bulletInstances[0]);
+            //}
 
             //Debug.Log(enemyTank.pos.ToString());
             Vector3 newPos = new Vector3(enemyTankClass.pos.x, enemyTankClass.pos.y, enemyTankClass.pos.z);
@@ -158,22 +155,17 @@ public class CreateServer : MonoBehaviour
             tankInstances[1].GetComponentInChildren<Transform>().Find("Cannon").position = enemyTankClass.cannonPos;
             tankInstances[1].GetComponentInChildren<TankControls>().SetHP(enemyTankClass.hp);
           
-           
-
-
-            //Instantiate enemy bullets
-            foreach (Transform projectileGO in enemyTankClass.bulletInstances)
-            {
-                Debug.Log( enemyTankClass.bulletInstances.Count);
-                if (projectileGO != null /*&& bulletAmount>= enemyTankClass.bulletInstances.Count*/)
-                {
-                    Instantiate(bulletPrefab, projectileGO.transform.position,
-            projectileGO.transform.rotation);
-                    Debug.Log("It is here");
-                }
-                
-            }
-
+            //Instantiate enemy bullets :(((
+            //foreach (Transform projectileGO in enemyTankClass.bulletInstances)
+            //{
+            //    Debug.Log( enemyTankClass.bulletInstances.Count);
+            //    if (projectileGO != null /*&& bulletAmount>= enemyTankClass.bulletInstances.Count*/)
+            //    {
+            //        Instantiate(bulletPrefab, projectileGO.transform.position,
+            //        projectileGO.transform.rotation);
+            //        Debug.Log("It is here");
+            //    }     
+            //}
         }
     }
     void Send()
@@ -183,8 +175,7 @@ public class CreateServer : MonoBehaviour
             SerializeJson(myTankClass);
             if (!isFirstMessage) //wait until the message with the client IP is functioning.
             {
-                oldSocket.SendTo(mem.GetBuffer(), mem.GetBuffer().Length, SocketFlags.None, ipepClient2);
-
+                sendSocket.SendTo(mem.GetBuffer(), mem.GetBuffer().Length, SocketFlags.None, ipepClient2);
             }
         }
     }
@@ -193,7 +184,7 @@ public class CreateServer : MonoBehaviour
         while (true)
         {
             // We recieve data, then deserialize it
-            newSocket.ReceiveFrom(data, ref ipepClient);
+            recSocket.ReceiveFrom(data, ref ipepClient);
             
             if (isFirstMessage)
             {
@@ -210,7 +201,6 @@ public class CreateServer : MonoBehaviour
             }
             else
             {
-                
                 MemoryStream stream = new MemoryStream(data);
                 BinaryReader reader = new BinaryReader(stream);
                 stream.Seek(0, SeekOrigin.Begin);
@@ -246,15 +236,15 @@ public class CreateServer : MonoBehaviour
     private void OnApplicationQuit()
     {
         //Socket & Thread CleanUp
-        if (newSocket != null)
+        if (recSocket != null)
         {
-            newSocket.Close();
-            newSocket = null;
+            recSocket.Close();
+            recSocket = null;
         }
-        if (oldSocket != null)
+        if (sendSocket != null)
         {
-            oldSocket.Close();
-            oldSocket = null;
+            sendSocket.Close();
+            sendSocket = null;
         }
         if (recthread != null)
         {

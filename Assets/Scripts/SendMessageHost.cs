@@ -34,6 +34,6 @@ public class SendMessageHost : MonoBehaviour
 
     void SendM()
     {
-        createS.newSocket.SendTo(data, data.Length, SocketFlags.None, createS.ipepClient);
+        createS.recSocket.SendTo(data, data.Length, SocketFlags.None, createS.ipepClient);
     }
 }

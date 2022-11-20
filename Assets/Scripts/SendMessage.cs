@@ -33,7 +33,7 @@ public class SendMessage : MonoBehaviour
     }
     void SendM()
     {
-        joinS.newSocket.SendTo(data, data.Length, SocketFlags.None, joinS.ipepServer);
+        joinS.sendSocket.SendTo(data, data.Length, SocketFlags.None, joinS.ipepServer);
         Debug.Log("Message sent");
     }
 
