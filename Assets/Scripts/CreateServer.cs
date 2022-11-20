@@ -85,13 +85,9 @@ public class CreateServer : MonoBehaviour
         // Server Endpoint
         IPEndPoint ipep = new IPEndPoint(IPAddress.Any, port);
         ipepClient = (EndPoint)ipep;
-        
-        //IPEndPoint ipep2 = new IPEndPoint(IPAddress.Parse(clientIP), port2);
-        //ipepClient2 = (EndPoint)ipep2;
 
         // Binding Socket
         newSocket.Bind(ipep);
-
 
         recthread = new Thread(Rec);
         recthread.Start();
@@ -140,15 +136,6 @@ public class CreateServer : MonoBehaviour
             {
                 myTankClass.bulletInstances[i] = tankInstances[0].GetComponentInChildren<AimControls>().bulletInstances[i];
             }
-
-            //if (myTankClass.bulletInstances.Count != 0)
-            //{
-            //    Debug.Log(myTankClass.bulletInstances[0]);
-            //}
-
-
-
-            //Debug.Log(myTankClass.pos);
         }
 
         if (jsonClient != null)
@@ -170,9 +157,12 @@ public class CreateServer : MonoBehaviour
             tankInstances[1].GetComponentInChildren<Transform>().Find("Cannon").rotation = enemyTankClass.cannonRot;
             tankInstances[1].GetComponentInChildren<Transform>().Find("Cannon").position = enemyTankClass.cannonPos;
             tankInstances[1].GetComponentInChildren<TankControls>().SetHP(enemyTankClass.hp);
-            
+          
+           
+
+
             //Instantiate enemy bullets
-            foreach(Transform projectileGO in enemyTankClass.bulletInstances)
+            foreach (Transform projectileGO in enemyTankClass.bulletInstances)
             {
                 Debug.Log( enemyTankClass.bulletInstances.Count);
                 if (projectileGO != null /*&& bulletAmount>= enemyTankClass.bulletInstances.Count*/)

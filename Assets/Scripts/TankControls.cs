@@ -7,7 +7,7 @@ public class TankControls : MonoBehaviour
     private float maxHealth = 100;
     public float currentHealth;
 
-    [SerializeField] private HealthBar healthBar;
+    [SerializeField] public HealthBar healthBar;
 
     [HideInInspector] public bool isEnabled;
     private void Start()
@@ -20,7 +20,9 @@ public class TankControls : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        if(isEnabled)
+        healthBar.UpdateHealthBar(maxHealth, currentHealth);
+
+        if (isEnabled)
         {
             float inputX = Input.GetAxis("Horizontal");
 
@@ -34,7 +36,7 @@ public class TankControls : MonoBehaviour
     {
         if (collision.gameObject.tag == "Bullet")
         {
-            currentHealth -= collision.gameObject.GetComponent<BulletLogic>().damage;
+            SetHP(currentHealth - collision.gameObject.GetComponent<BulletLogic>().damage);
             healthBar.UpdateHealthBar(maxHealth, currentHealth);
         }
     }
