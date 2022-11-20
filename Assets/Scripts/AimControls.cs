@@ -10,6 +10,9 @@ public class AimControls : MonoBehaviour
     private float nextShot = 0.15f;
     private float cooldown=0.5f;
 
+    // Create a list where we will store the tank's bullets
+    public List<Transform> bulletInstances = new List<Transform>();
+
     // Update is called once per frame
     void Update()
     {
@@ -27,12 +30,35 @@ public class AimControls : MonoBehaviour
                 ProjectileShoot();
             }
         }
+        ManageBulletList();
     }
 
     private void ProjectileShoot()
     {
         GameObject projectileGO = (GameObject)Instantiate(bulletPrefab, barrelEnd.transform.position,
             transform.rotation);
+
+        
+        //Add new bullets to list
+        bulletInstances.Add(projectileGO.transform);
+
         nextShot = Time.time + cooldown;
+    }
+
+    private void ManageBulletList()
+    {
+        //Clean/Manage bullet list
+        for (int i = bulletInstances.Count - 1; i >= 0; i--)
+        {
+            if (bulletInstances[i] != null)
+            {
+                //Do stuff
+            }
+            else
+            {
+                bulletInstances[i] = bulletInstances[bulletInstances.Count - 1];
+                bulletInstances.RemoveAt(bulletInstances.Count - 1);
+            }
+        }
     }
 }

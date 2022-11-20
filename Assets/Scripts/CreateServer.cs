@@ -50,6 +50,7 @@ public class CreateServer : MonoBehaviour
         public Vector3 pos;
         public Quaternion cannonRot;
         public Vector3 cannonPos;
+        public List<Transform> bulletInstances;
     }
 
     private tankClass myTankClass;
@@ -59,6 +60,7 @@ public class CreateServer : MonoBehaviour
     public GameObject tankPrefab;
     public GameObject spawn;
     public GameObject enemySpawn;
+    public GameObject bulletPrefab;
 
     // Create a list where we will store the tanks
     private List<GameObject> tankInstances = new List<GameObject>();
@@ -70,7 +72,7 @@ public class CreateServer : MonoBehaviour
 
     public void Create()
     {
-        data = new byte[256];
+        data = new byte[1024];
         enemyTankClass = new tankClass();
         myTankClass = new tankClass();
 
@@ -131,6 +133,21 @@ public class CreateServer : MonoBehaviour
             myTankClass.hp = tankInstances[0].GetComponent<TankControls>().GetHP();
             myTankClass.cannonPos = tankInstances[0].GetComponentInChildren<Transform>().Find("Cannon").position;
 
+            //Update list of bullets
+            myTankClass.bulletInstances = tankInstances[0].GetComponentInChildren<AimControls>().bulletInstances;
+            
+            for (int i=0;i < myTankClass.bulletInstances.Count;i++)
+            {
+                myTankClass.bulletInstances[i] = tankInstances[0].GetComponentInChildren<AimControls>().bulletInstances[i];
+            }
+
+            //if (myTankClass.bulletInstances.Count != 0)
+            //{
+            //    Debug.Log(myTankClass.bulletInstances[0]);
+            //}
+
+
+
             //Debug.Log(myTankClass.pos);
         }
 
@@ -138,12 +155,35 @@ public class CreateServer : MonoBehaviour
         {
             enemyTankClass = JsonUtility.FromJson<tankClass>(jsonClient);
 
+
+
+            Debug.Log(enemyTankClass.bulletInstances.Count);
+            if (enemyTankClass.bulletInstances.Count != 0)
+            {
+                Debug.Log(enemyTankClass.bulletInstances[0]);
+            }
+
+
             //Debug.Log(enemyTank.pos.ToString());
             Vector3 newPos = new Vector3(enemyTankClass.pos.x, enemyTankClass.pos.y, enemyTankClass.pos.z);
             tankInstances[1].transform.position = newPos;
             tankInstances[1].GetComponentInChildren<Transform>().Find("Cannon").rotation = enemyTankClass.cannonRot;
             tankInstances[1].GetComponentInChildren<Transform>().Find("Cannon").position = enemyTankClass.cannonPos;
             tankInstances[1].GetComponentInChildren<TankControls>().SetHP(enemyTankClass.hp);
+            
+            //Instantiate enemy bullets
+            foreach(Transform projectileGO in enemyTankClass.bulletInstances)
+            {
+                Debug.Log( enemyTankClass.bulletInstances.Count);
+                if (projectileGO != null /*&& bulletAmount>= enemyTankClass.bulletInstances.Count*/)
+                {
+                    Instantiate(bulletPrefab, projectileGO.transform.position,
+            projectileGO.transform.rotation);
+                    Debug.Log("It is here");
+                }
+                
+            }
+
         }
     }
     void Send()

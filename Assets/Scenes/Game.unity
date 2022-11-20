@@ -344,6 +344,7 @@ MonoBehaviour:
   tankPrefab: {fileID: 5248261022474919008, guid: 9fc71bc73759095459871755d573f2dc, type: 3}
   spawn: {fileID: 1865859663}
   enemySpawn: {fileID: 1347186484}
+  bulletPrefab: {fileID: 6812853383755138604, guid: 730d35e26d6e7de4193333fc9e4adc81, type: 3}
 --- !u!114 &277872009
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1526,9 +1527,11 @@ MonoBehaviour:
   recData: 
   recTrue: 0
   messageSent: 0
+  clientIP: 
   tankPrefab: {fileID: 5248261022474919008, guid: 9fc71bc73759095459871755d573f2dc, type: 3}
   spawn: {fileID: 1347186484}
   enemySpawn: {fileID: 1865859663}
+  bulletPrefab: {fileID: 6812853383755138604, guid: 730d35e26d6e7de4193333fc9e4adc81, type: 3}
 --- !u!114 &1462169000
 MonoBehaviour:
   m_ObjectHideFlags: 0

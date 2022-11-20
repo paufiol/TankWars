@@ -44,6 +44,7 @@ public class JoinServer : MonoBehaviour
     public GameObject tankPrefab;
     public GameObject spawn;
     public GameObject enemySpawn;
+    public GameObject bulletPrefab;
 
     MemoryStream mem = new MemoryStream();
     private byte[] data;
@@ -57,6 +58,7 @@ public class JoinServer : MonoBehaviour
         public Vector3 pos;
         public Quaternion cannonRot;
         public Vector3 cannonPos;
+        public List<Transform> bulletInstances;
     }
     // create the needed classes
     private tankClass hostTankClass;
@@ -73,7 +75,7 @@ public class JoinServer : MonoBehaviour
 
     public void Join()
     {
-        data = new byte[256];
+        data = new byte[1024];
         hostTankClass = new tankClass();
         myTankClass = new tankClass();
 
@@ -135,6 +137,15 @@ public class JoinServer : MonoBehaviour
             myTankClass.hp = tankInstances[0].GetComponent<TankControls>().GetHP();
             myTankClass.cannonPos = tankInstances[0].GetComponentInChildren<Transform>().Find("Cannon").position;
 
+
+            //Update list of bullets
+            myTankClass.bulletInstances = tankInstances[0].GetComponentInChildren<AimControls>().bulletInstances;
+
+            for (int i = 0; i < myTankClass.bulletInstances.Count; i++)
+            {
+                myTankClass.bulletInstances[i] = tankInstances[0].GetComponentInChildren<AimControls>().bulletInstances[i];
+            }
+
         }
         if (jsonHost != null)
         {
@@ -146,6 +157,16 @@ public class JoinServer : MonoBehaviour
             tankInstances[1].GetComponentInChildren<Transform>().Find("Cannon").rotation = hostTankClass.cannonRot;
             tankInstances[1].GetComponentInChildren<Transform>().Find("Cannon").position = hostTankClass.cannonPos;
             tankInstances[1].GetComponentInChildren<TankControls>().SetHP(hostTankClass.hp);
+
+            //Instantiate enemy bullets
+            //foreach (GameObject bullet in tankInstances[1].GetComponentInChildren<AimControls>().bulletInstances)
+            //{
+            //    if (bullet != null)
+            //    {
+            //        Instantiate(bulletPrefab, bullet.transform.position,
+            //bullet.transform.rotation);
+            //    }
+            //}
         }
     }
 
