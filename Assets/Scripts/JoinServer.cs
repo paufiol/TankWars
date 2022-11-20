@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.IO;
 using UnityEngine.UI;
+using System.Linq;
 
 public class JoinServer : MonoBehaviour
 {
@@ -88,7 +89,7 @@ public class JoinServer : MonoBehaviour
 
         // Server Endpoint
         ipepServer = new IPEndPoint(IPAddress.Parse(ipString), port);
-        ipepServer2 = new IPEndPoint(IPAddress.Parse(ipString), port2);
+        ipepServer2 = new IPEndPoint(IPAddress.Any, port2);
 
         oldSocket.Bind(ipepServer2);
 
@@ -144,6 +145,7 @@ public class JoinServer : MonoBehaviour
 
     void Send()
     {
+
         while (true)
         {
             // Serialize and send the data inside tankClass
@@ -166,7 +168,7 @@ public class JoinServer : MonoBehaviour
             stream.Seek(0, SeekOrigin.Begin);
             jsonHost = reader.ReadString();
 
-            Debug.Log(json);
+            Debug.Log(jsonHost);
 
             if (recData != null)
             {
@@ -190,6 +192,11 @@ public class JoinServer : MonoBehaviour
             newSocket.Close();
             newSocket = null;
         }
+        if (oldSocket != null)
+        {
+            oldSocket.Close();
+            oldSocket = null;
+        }
         if (recthread != null)
         {
             recthread.Abort();
@@ -200,5 +207,12 @@ public class JoinServer : MonoBehaviour
             sendthread.Abort();
             sendthread = null;
         }
+    }
+    public string GetLocalIPv4()
+    {
+        return Dns.GetHostEntry(Dns.GetHostName())
+            .AddressList.Last(
+                f => f.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+            .ToString();
     }
 }

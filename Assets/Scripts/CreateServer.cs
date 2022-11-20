@@ -39,6 +39,7 @@ public class CreateServer : MonoBehaviour
     private byte[] data;
     private string json;
     private string jsonClient;
+    private bool clientJoined = false;
 
     // We create the class where we will store all the data of the tank
     class tankClass
@@ -50,7 +51,7 @@ public class CreateServer : MonoBehaviour
 
     private tankClass myTankClass;
     private tankClass enemyTankClass;
-
+    
     //Tank and spawn
     public GameObject tankPrefab;
     public GameObject spawn;
@@ -79,12 +80,13 @@ public class CreateServer : MonoBehaviour
         // Server Endpoint
         IPEndPoint ipep = new IPEndPoint(IPAddress.Any, port);
         ipepClient = (EndPoint)ipep;
-
-        IPEndPoint ipep2 = new IPEndPoint(IPAddress.Any, port2);
+        string ipString = ("192.168.1.134");
+        IPEndPoint ipep2 = new IPEndPoint(IPAddress.Parse(ipString), port2);
         ipepClient2 = (EndPoint)ipep2;
 
         // Binding Socket
         newSocket.Bind(ipep);
+
 
         recthread = new Thread(Rec);
         recthread.Start();
@@ -124,13 +126,14 @@ public class CreateServer : MonoBehaviour
             myTankClass.pos.y = tankInstances[0].transform.position.y;
             myTankClass.rot = tankInstances[0].GetComponentInChildren<Transform>().Find("Cannon").rotation;
             myTankClass.hp = tankInstances[0].GetComponent<TankControls>().GetHP();
-            Debug.Log(myTankClass.pos);
+            //Debug.Log(myTankClass.pos);
         }
 
         if (jsonClient != null)
         {
+            clientJoined = true;
             enemyTankClass = JsonUtility.FromJson<tankClass>(jsonClient);
-            
+
             //Debug.Log(enemyTank.pos.ToString());
             Vector3 newPos = new Vector3(enemyTankClass.pos.x, enemyTankClass.pos.y, enemyTankClass.pos.z);
             tankInstances[1].transform.position = newPos;
@@ -141,12 +144,20 @@ public class CreateServer : MonoBehaviour
         while (true)
         {
             // Serialize and send the data inside tankClass
-            SerializeJson(myTankClass);
+            //SerializeJson(myTankClass);
             //Debug.Log(mem.GetBuffer().Length.ToString());
-            oldSocket.SendTo(mem.GetBuffer(), mem.GetBuffer().Length, SocketFlags.None, ipepClient2);
-            //Debug.Log("Message sent: " + myTankClass.hp.ToString() + "POS " + myTankClass.pos.x.ToString() + " " + myTankClass.pos.y.ToString() + "Turret Rot:" + myTankClass.rot.ToString());
-
+            //if (clientJoined == true)
+            //{
+                mem = new MemoryStream();
+                json = JsonUtility.ToJson(myTankClass);
+                BinaryWriter writer = new BinaryWriter(mem);
+                writer.Write(json);
+                Debug.Log("Serialized");
+                oldSocket.SendTo(mem.GetBuffer(), mem.GetBuffer().Length, SocketFlags.None, ipepClient2);
+                
+           // }
         }
+
     }
     void Rec()
     {
@@ -190,6 +201,11 @@ public class CreateServer : MonoBehaviour
         {
             newSocket.Close();
             newSocket = null;
+        }
+        if (oldSocket != null)
+        {
+            oldSocket.Close();
+            oldSocket = null;
         }
         if (recthread != null)
         {
