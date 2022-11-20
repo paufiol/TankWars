@@ -17,7 +17,9 @@ public class CreateServer : MonoBehaviour
     public Canvas textCanvas;
 
     [HideInInspector] public Socket newSocket;
+    [HideInInspector] public Socket oldSocket;
     private int port = 5631;
+    private int port2 = 5655;
 
     [HideInInspector] public string hostIP;
 
@@ -28,6 +30,7 @@ public class CreateServer : MonoBehaviour
     [HideInInspector] public bool messageSent = false;
 
     [HideInInspector] public EndPoint ipepClient;
+    [HideInInspector] public EndPoint ipepClient2;
 
     [HideInInspector] public Thread recthread;
     [HideInInspector] public Thread sendthread;
@@ -70,9 +73,15 @@ public class CreateServer : MonoBehaviour
         // Creating UDP Socket
         newSocket = new Socket(AddressFamily.InterNetwork,
                                SocketType.Dgram, ProtocolType.Udp);
+
+        oldSocket = new Socket(AddressFamily.InterNetwork,
+                              SocketType.Dgram, ProtocolType.Udp);
         // Server Endpoint
         IPEndPoint ipep = new IPEndPoint(IPAddress.Any, port);
         ipepClient = (EndPoint)ipep;
+
+        IPEndPoint ipep2 = new IPEndPoint(IPAddress.Any, port2);
+        ipepClient2 = (EndPoint)ipep2;
 
         // Binding Socket
         newSocket.Bind(ipep);
@@ -134,7 +143,7 @@ public class CreateServer : MonoBehaviour
             // Serialize and send the data inside tankClass
             SerializeJson(myTankClass);
             //Debug.Log(mem.GetBuffer().Length.ToString());
-            newSocket.SendTo(mem.GetBuffer(), mem.GetBuffer().Length, SocketFlags.None, ipepClient);
+            oldSocket.SendTo(mem.GetBuffer(), mem.GetBuffer().Length, SocketFlags.None, ipepClient2);
             //Debug.Log("Message sent: " + myTankClass.hp.ToString() + "POS " + myTankClass.pos.x.ToString() + " " + myTankClass.pos.y.ToString() + "Turret Rot:" + myTankClass.rot.ToString());
 
         }

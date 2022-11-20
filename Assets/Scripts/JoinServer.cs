@@ -19,11 +19,14 @@ public class JoinServer : MonoBehaviour
     public Canvas textCanvas;
 
     public Socket newSocket;
+    public Socket oldSocket;
     private int port = 5631;
+    private int port2 = 5655;
 
     // Sockets stuff
 
     [HideInInspector] public EndPoint ipepServer;
+    [HideInInspector] public EndPoint ipepServer2;
 
     [HideInInspector] public string recData;
     [HideInInspector] public bool recTrue = false;
@@ -78,9 +81,16 @@ public class JoinServer : MonoBehaviour
         // Creating UDP Socket
         newSocket = new Socket(AddressFamily.InterNetwork,
                                SocketType.Dgram, ProtocolType.Udp);
+        oldSocket = new Socket(AddressFamily.InterNetwork,
+                               SocketType.Dgram, ProtocolType.Udp);
+
+      
 
         // Server Endpoint
         ipepServer = new IPEndPoint(IPAddress.Parse(ipString), port);
+        ipepServer2 = new IPEndPoint(IPAddress.Parse(ipString), port2);
+
+        oldSocket.Bind(ipepServer2);
 
         messageSent = true;
 
@@ -150,7 +160,7 @@ public class JoinServer : MonoBehaviour
         while (true)
         {
             // We recieve data, then deserialize it
-            newSocket.ReceiveFrom(data, ref ipepServer);
+            oldSocket.ReceiveFrom(data, ref ipepServer2);
             MemoryStream stream = new MemoryStream(data);
             BinaryReader reader = new BinaryReader(stream);
             stream.Seek(0, SeekOrigin.Begin);
