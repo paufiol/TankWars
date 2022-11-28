@@ -59,7 +59,7 @@ public class JoinServer : MonoBehaviour
         public Vector3 pos;
         public Quaternion cannonRot;
         public Vector3 cannonPos;
-        public List<BulletInfo> bulletData = new List<BulletInfo>();
+        public List<AimControls.BulletInfo> bulletData = new List<AimControls.BulletInfo>();
     }
 
     // create the needed classes
@@ -68,6 +68,8 @@ public class JoinServer : MonoBehaviour
 
     // Create a list where we will store the tanks
     private List<GameObject> tankInstances = new List<GameObject>();
+
+    private int bulletAmount = 0;
 
     void Start()
     {
@@ -170,14 +172,14 @@ public class JoinServer : MonoBehaviour
             tankInstances[1].GetComponentInChildren<TankControls>().SetHP(hostTankClass.hp);
 
             //Instantiate enemy bullets
-            //foreach (BulletInfo bullet in tankInstances[1].GetComponentInChildren<AimControls>().bulletData)
-            //{
-            //    if (bullet != null)
-            //    {
-            //        Instantiate(bulletPrefab, bullet.transform.position,
-            //bullet.transform.rotation);
-            //    }
-            //}
+            if (hostTankClass.bulletData.Count > 0 && hostTankClass.bulletData[hostTankClass.bulletData.Count - 1] != null)
+            {
+                if (bulletAmount < hostTankClass.bulletData.Count)
+                {
+                    Instantiate(bulletPrefab, hostTankClass.bulletData[hostTankClass.bulletData.Count - 1].position, hostTankClass.bulletData[hostTankClass.bulletData.Count - 1].rotation);
+                }
+            }
+            bulletAmount = hostTankClass.bulletData.Count;
         }
     }
 

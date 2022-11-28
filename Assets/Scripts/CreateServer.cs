@@ -69,6 +69,8 @@ public class CreateServer : MonoBehaviour
     // Create a list where we will store the tanks
     private List<GameObject> tankInstances = new List<GameObject>();
 
+    private int bulletAmount = 0;
+
     void Start()
     {
         textCanvas.GetComponent<Canvas>().enabled = false;
@@ -170,16 +172,16 @@ public class CreateServer : MonoBehaviour
             tankInstances[1].GetComponentInChildren<TankControls>().SetHP(enemyTankClass.hp);
 
             //Instantiate enemy bullets En proceso
-            //foreach (AimControls.BulletInfo projectileGO in enemyTankClass.bulletData)
-            //{
-            //    Debug.Log(enemyTankClass.bulletData.Count);
-            //    if (projectileGO != null /*&& bulletAmount>= enemyTankClass.bulletInstances.Count*/)
-            //    {
-            //        //Instantiate(bulletPrefab, projectileGO.transform.position,
-            //        //projectileGO.transform.rotation);
-            //        Debug.Log("It is here");
-            //    }
-            //}
+            
+            if(enemyTankClass.bulletData.Count>0 && enemyTankClass.bulletData[enemyTankClass.bulletData.Count-1]!=null)
+            {
+                if(bulletAmount < enemyTankClass.bulletData.Count)
+                {
+                    Instantiate(bulletPrefab, enemyTankClass.bulletData[enemyTankClass.bulletData.Count - 1].position, enemyTankClass.bulletData[enemyTankClass.bulletData.Count - 1].rotation);
+                }
+                
+            }
+                bulletAmount = enemyTankClass.bulletData.Count;
         }
     }
     void Send()

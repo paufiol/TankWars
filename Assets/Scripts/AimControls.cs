@@ -12,6 +12,7 @@ public class AimControls : MonoBehaviour
 
     public List<BulletInfo> bulletData = new List<BulletInfo>();
     private List<GameObject> bulletList = new List<GameObject>();
+    public bool shotFired = false;
 
     [System.Serializable]
     public class BulletInfo
@@ -57,6 +58,8 @@ public class AimControls : MonoBehaviour
 
         //Bullet cooldown
         nextShot = Time.time + cooldown;
+
+        shotFired = true;
     }
 
     private void ManageBulletList()
