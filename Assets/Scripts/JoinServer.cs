@@ -59,7 +59,7 @@ public class JoinServer : MonoBehaviour
         public Vector3 pos;
         public Quaternion cannonRot;
         public Vector3 cannonPos;
-        //public List<Transform> bulletInstances;
+        public List<BulletInfo> bulletData = new List<BulletInfo>();
     }
 
     // create the needed classes
@@ -140,7 +140,7 @@ public class JoinServer : MonoBehaviour
 
 
             //Update list of bullets
-            //myTankClass.bulletInstances = tankInstances[0].GetComponentInChildren<AimControls>().bulletInstances;
+            myTankClass.bulletData = tankInstances[0].GetComponentInChildren<AimControls>().bulletData;
 
             //for (int i = 0; i < myTankClass.bulletInstances.Count; i++)
             //{
@@ -148,7 +148,7 @@ public class JoinServer : MonoBehaviour
             //}
 
             //VictoryScreen when a tank dies
-            if(tankInstances[0].GetComponent<TankControls>().GetHP() <= 0)
+            if (tankInstances[0].GetComponent<TankControls>().GetHP() <= 0)
             {
                 CanvasClient.GetComponent<Canvas>().enabled = true;
             }
@@ -168,9 +168,9 @@ public class JoinServer : MonoBehaviour
             tankInstances[1].GetComponentInChildren<Transform>().Find("Cannon").rotation = hostTankClass.cannonRot;
             tankInstances[1].GetComponentInChildren<Transform>().Find("Cannon").position = hostTankClass.cannonPos;
             tankInstances[1].GetComponentInChildren<TankControls>().SetHP(hostTankClass.hp);
-           
+
             //Instantiate enemy bullets
-            //foreach (GameObject bullet in tankInstances[1].GetComponentInChildren<AimControls>().bulletInstances)
+            //foreach (BulletInfo bullet in tankInstances[1].GetComponentInChildren<AimControls>().bulletData)
             //{
             //    if (bullet != null)
             //    {

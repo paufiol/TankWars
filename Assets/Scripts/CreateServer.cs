@@ -43,6 +43,8 @@ public class CreateServer : MonoBehaviour
 
     public string clientIP;
 
+    
+
     // We create the class where we will store all the data of the tank
     class tankClass
     {
@@ -50,8 +52,10 @@ public class CreateServer : MonoBehaviour
         public Vector3 pos;
         public Quaternion cannonRot;
         public Vector3 cannonPos;
-        //public List<Transform> bulletInstances;
+        public List<AimControls.BulletInfo> bulletData=new List<AimControls.BulletInfo>();
     }
+
+    
 
     private tankClass myTankClass;
     private tankClass enemyTankClass;
@@ -129,10 +133,20 @@ public class CreateServer : MonoBehaviour
             myTankClass.hp = tankInstances[0].GetComponent<TankControls>().GetHP();
             myTankClass.cannonPos = tankInstances[0].GetComponentInChildren<Transform>().Find("Cannon").position;
 
-            //Update list of bullets
-            //myTankClass.bulletInstances = tankInstances[0].GetComponentInChildren<AimControls>().bulletInstances;
-            
-            //for (int i=0;i < myTankClass.bulletInstances.Count;i++)
+            //Update list of bullets TODO CONTINUA AQUI
+            //foreach(AimControls.BulletInfo bulletI in tankInstances[0].GetComponentInChildren<AimControls>().bulletData)
+            //{
+                
+            //    myTankClass.bulletData.Add(bulletI);
+            //}
+            myTankClass.bulletData = tankInstances[0].GetComponentInChildren<AimControls>().bulletData;
+
+            if(myTankClass.bulletData.Count!=0)
+            {
+                Debug.Log(myTankClass.bulletData[0].position);
+            }
+
+            //for (int i = 0; i < myTankClass.bulletInstances.Count; i++)
             //{
             //    myTankClass.bulletInstances[i] = tankInstances[0].GetComponentInChildren<AimControls>().bulletInstances[i];
             //}
@@ -142,11 +156,11 @@ public class CreateServer : MonoBehaviour
         {
             enemyTankClass = JsonUtility.FromJson<tankClass>(jsonClient);
 
-            //Debug.Log(enemyTankClass.bulletInstances.Count);
-            //if (enemyTankClass.bulletInstances.Count != 0)
-            //{
-            //    Debug.Log(enemyTankClass.bulletInstances[0]);
-            //}
+            Debug.Log(enemyTankClass.bulletData.Count);
+            if (enemyTankClass.bulletData.Count != 0)
+            {
+                Debug.Log(enemyTankClass.bulletData[0].position);
+            }
 
             //Debug.Log(enemyTank.pos.ToString());
             Vector3 newPos = new Vector3(enemyTankClass.pos.x, enemyTankClass.pos.y, enemyTankClass.pos.z);
@@ -154,17 +168,17 @@ public class CreateServer : MonoBehaviour
             tankInstances[1].GetComponentInChildren<Transform>().Find("Cannon").rotation = enemyTankClass.cannonRot;
             tankInstances[1].GetComponentInChildren<Transform>().Find("Cannon").position = enemyTankClass.cannonPos;
             tankInstances[1].GetComponentInChildren<TankControls>().SetHP(enemyTankClass.hp);
-          
-            //Instantiate enemy bullets :(((
-            //foreach (Transform projectileGO in enemyTankClass.bulletInstances)
+
+            //Instantiate enemy bullets En proceso
+            //foreach (AimControls.BulletInfo projectileGO in enemyTankClass.bulletData)
             //{
-            //    Debug.Log( enemyTankClass.bulletInstances.Count);
+            //    Debug.Log(enemyTankClass.bulletData.Count);
             //    if (projectileGO != null /*&& bulletAmount>= enemyTankClass.bulletInstances.Count*/)
             //    {
-            //        Instantiate(bulletPrefab, projectileGO.transform.position,
-            //        projectileGO.transform.rotation);
+            //        //Instantiate(bulletPrefab, projectileGO.transform.position,
+            //        //projectileGO.transform.rotation);
             //        Debug.Log("It is here");
-            //    }     
+            //    }
             //}
         }
     }

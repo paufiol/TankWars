@@ -10,8 +10,16 @@ public class AimControls : MonoBehaviour
     private float nextShot = 0.15f;
     private float cooldown=0.5f;
 
-    // Create a list where we will store the tank's bullets (EVERYTHING COMMENTED COUSE IT DOESNT WORK)
-    //public List<Transform> bulletInstances = new List<Transform>();
+    public List<BulletInfo> bulletData = new List<BulletInfo>();
+    private List<GameObject> bulletList = new List<GameObject>();
+
+    [System.Serializable]
+    public class BulletInfo
+    {
+        public Vector3 position;
+        public Quaternion rotation;
+    }
+
 
     // Update is called once per frame
     void Update()
@@ -30,7 +38,7 @@ public class AimControls : MonoBehaviour
                 ProjectileShoot();
             }
         }
-        //ManageBulletList();
+        ManageBulletList();
     }
 
     private void ProjectileShoot()
@@ -38,27 +46,36 @@ public class AimControls : MonoBehaviour
         GameObject projectileGO = (GameObject)Instantiate(bulletPrefab, barrelEnd.transform.position,
             transform.rotation);
 
-        
-        //Add new bullets to list
-        //bulletInstances.Add(projectileGO.transform);
 
+        //Add new bullets to list
+        BulletInfo bullet = new BulletInfo();
+        bullet.position = projectileGO.transform.position;
+        bullet.rotation = projectileGO.transform.rotation;
+
+        bulletList.Add(projectileGO);
+        bulletData.Add(bullet);
+
+        //Bullet cooldown
         nextShot = Time.time + cooldown;
     }
 
-    //private void ManageBulletList()
-    //{
-    //    //Clean/Manage bullet list
-    //    for (int i = bulletInstances.Count - 1; i >= 0; i--)
-    //    {
-    //        if (bulletInstances[i] != null)
-    //        {
-    //            //Do stuff
-    //        }
-    //        else
-    //        {
-    //            bulletInstances[i] = bulletInstances[bulletInstances.Count - 1];
-    //            bulletInstances.RemoveAt(bulletInstances.Count - 1);
-    //        }
-    //    }
-    //}
+    private void ManageBulletList()
+    {
+        //Clean/Manage bullet list
+        for (int i = bulletList.Count - 1; i >= 0; i--)
+        {
+            if (bulletList[i] != null)
+            {
+                //Do stuff
+            }
+            else
+            {
+                bulletList[i] = bulletList[bulletList.Count - 1];
+                bulletList.RemoveAt(bulletList.Count - 1);
+
+                bulletData[i] = bulletData[bulletData.Count - 1];
+                bulletData.RemoveAt(bulletData.Count - 1); 
+            }
+        }
+    }
 }
