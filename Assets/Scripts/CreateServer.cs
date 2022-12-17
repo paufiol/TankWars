@@ -46,19 +46,21 @@ public class CreateServer : MonoBehaviour
     
 
     // We create the class where we will store all the data of the tank
-    class tankClass
+    public class tankClass
     {
         public float hp;
         public Vector3 pos;
         public Quaternion cannonRot;
         public Vector3 cannonPos;
         public List<AimControls.BulletInfo> bulletData=new List<AimControls.BulletInfo>();
+
+        public string message; //Here we store messages sent
     }
 
     
 
-    private tankClass myTankClass;
-    private tankClass enemyTankClass;
+    public tankClass myTankClass;
+    public tankClass enemyTankClass;
     
     //Tank and spawn
     public GameObject tankPrefab;
@@ -171,9 +173,14 @@ public class CreateServer : MonoBehaviour
             tankInstances[1].GetComponentInChildren<Transform>().Find("Cannon").position = enemyTankClass.cannonPos;
             tankInstances[1].GetComponentInChildren<TankControls>().SetHP(enemyTankClass.hp);
 
+            //Send message to the chat Canvas if it isn't empty
+            if (enemyTankClass.message != string.Empty)
+            {
+                message.text += "/n" + enemyTankClass.message;
+            }
+
             //Instantiate enemy bullets En proceso
-            
-            if(enemyTankClass.bulletData.Count>0 && enemyTankClass.bulletData[enemyTankClass.bulletData.Count-1]!=null)
+            if (enemyTankClass.bulletData.Count>0 && enemyTankClass.bulletData[enemyTankClass.bulletData.Count-1]!=null)
             {
                 if(bulletAmount < enemyTankClass.bulletData.Count)
                 {
@@ -248,7 +255,6 @@ public class CreateServer : MonoBehaviour
         writer.Write(json);
         //Debug.Log("Serialized");
     }
-
     private void OnApplicationQuit()
     {
         //Socket & Thread CleanUp

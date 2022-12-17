@@ -40,7 +40,6 @@ public class TankControls : MonoBehaviour
             healthBar.UpdateHealthBar(maxHealth, currentHealth);
         }
     }
-
     public float GetHP()
     {
         return currentHealth;

@@ -53,18 +53,20 @@ public class JoinServer : MonoBehaviour
     private string jsonHost;
 
     // We create the class where we will store all the data of the tank to be turned into the smallest json possible
-    class tankClass
+    public class tankClass
     {
         public float hp;
         public Vector3 pos;
         public Quaternion cannonRot;
         public Vector3 cannonPos;
         public List<AimControls.BulletInfo> bulletData = new List<AimControls.BulletInfo>();
+
+        public string message; //Here we store messages sent
     }
 
     // create the needed classes
-    private tankClass hostTankClass;
-    private tankClass myTankClass;
+    public tankClass hostTankClass;
+    public tankClass myTankClass;
 
     // Create a list where we will store the tanks
     private List<GameObject> tankInstances = new List<GameObject>();
@@ -140,7 +142,6 @@ public class JoinServer : MonoBehaviour
             myTankClass.cannonPos = tankInstances[0].GetComponentInChildren<Transform>().Find("Cannon").position;
             myTankClass.hp = tankInstances[0].GetComponent<TankControls>().GetHP();
 
-
             //Update list of bullets
             myTankClass.bulletData = tankInstances[0].GetComponentInChildren<AimControls>().bulletData;
 
@@ -170,6 +171,12 @@ public class JoinServer : MonoBehaviour
             tankInstances[1].GetComponentInChildren<Transform>().Find("Cannon").rotation = hostTankClass.cannonRot;
             tankInstances[1].GetComponentInChildren<Transform>().Find("Cannon").position = hostTankClass.cannonPos;
             tankInstances[1].GetComponentInChildren<TankControls>().SetHP(hostTankClass.hp);
+
+            //Send message to the chat Canvas if it isn't empty
+            if (hostTankClass.message != string.Empty)
+            {
+                message.text += "/n" + myTankClass.message;
+            }
 
             //Instantiate enemy bullets
             if (hostTankClass.bulletData.Count > 0 && hostTankClass.bulletData[hostTankClass.bulletData.Count - 1] != null)
