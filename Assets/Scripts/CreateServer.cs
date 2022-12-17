@@ -15,6 +15,7 @@ public class CreateServer : MonoBehaviour
     public Text message;
     public Canvas canvas;
     public Canvas textCanvas;
+    public Text winOrLose;
 
     [HideInInspector] public Socket recSocket;
     [HideInInspector] public Socket sendSocket;
@@ -57,10 +58,9 @@ public class CreateServer : MonoBehaviour
         public string message; //Here we store messages sent
     }
 
-    
-
     public tankClass myTankClass;
     public tankClass enemyTankClass;
+
     
     //Tank and spawn
     public GameObject tankPrefab;
@@ -73,8 +73,13 @@ public class CreateServer : MonoBehaviour
 
     private int bulletAmount = 0;
 
+    private bool restartEnabled;
+    private bool hasRestarted;
+
     void Start()
     {
+        restartEnabled = false;
+        hasRestarted = false;
         textCanvas.GetComponent<Canvas>().enabled = false;
     }
 
@@ -124,7 +129,7 @@ public class CreateServer : MonoBehaviour
 
     void Update()
     {
-        //Make sure there is at least one tank
+        //Check is the tanks exist
         if (tankInstances.Count>0)
         {
             //Disable 2nd tank controls
@@ -137,58 +142,67 @@ public class CreateServer : MonoBehaviour
             myTankClass.hp = tankInstances[0].GetComponent<TankControls>().GetHP();
             myTankClass.cannonPos = tankInstances[0].GetComponentInChildren<Transform>().Find("Cannon").position;
 
-            //Update list of bullets TODO CONTINUA AQUI
-            //foreach(AimControls.BulletInfo bulletI in tankInstances[0].GetComponentInChildren<AimControls>().bulletData)
-            //{
-                
-            //    myTankClass.bulletData.Add(bulletI);
-            //}
+            //Update list of bullets
             myTankClass.bulletData = tankInstances[0].GetComponentInChildren<AimControls>().bulletData;
 
-            if(myTankClass.bulletData.Count!=0)
+            if (jsonClient != null)
             {
-                Debug.Log(myTankClass.bulletData[0].position);
-            }
+                enemyTankClass = JsonUtility.FromJson<tankClass>(jsonClient);
 
-            //for (int i = 0; i < myTankClass.bulletInstances.Count; i++)
-            //{
-            //    myTankClass.bulletInstances[i] = tankInstances[0].GetComponentInChildren<AimControls>().bulletInstances[i];
-            //}
-        }
+                Vector3 newPos = new Vector3(enemyTankClass.pos.x, enemyTankClass.pos.y, enemyTankClass.pos.z);
+                tankInstances[1].transform.position = newPos;
+                tankInstances[1].GetComponentInChildren<Transform>().Find("Cannon").rotation = enemyTankClass.cannonRot;
+                tankInstances[1].GetComponentInChildren<Transform>().Find("Cannon").position = enemyTankClass.cannonPos;
+                tankInstances[1].GetComponentInChildren<TankControls>().SetHP(enemyTankClass.hp);
 
-        if (jsonClient != null)
-        {
-            enemyTankClass = JsonUtility.FromJson<tankClass>(jsonClient);
 
-            Debug.Log(enemyTankClass.bulletData.Count);
-            if (enemyTankClass.bulletData.Count != 0)
-            {
-                Debug.Log(enemyTankClass.bulletData[0].position);
-            }
 
-            //Debug.Log(enemyTank.pos.ToString());
-            Vector3 newPos = new Vector3(enemyTankClass.pos.x, enemyTankClass.pos.y, enemyTankClass.pos.z);
-            tankInstances[1].transform.position = newPos;
-            tankInstances[1].GetComponentInChildren<Transform>().Find("Cannon").rotation = enemyTankClass.cannonRot;
-            tankInstances[1].GetComponentInChildren<Transform>().Find("Cannon").position = enemyTankClass.cannonPos;
-            tankInstances[1].GetComponentInChildren<TankControls>().SetHP(enemyTankClass.hp);
-
-            //Send message to the chat Canvas if it isn't empty
-            if (enemyTankClass.message != string.Empty)
-            {
-                message.text += "/n" + enemyTankClass.message;
-            }
-
-            //Instantiate enemy bullets En proceso
-            if (enemyTankClass.bulletData.Count>0 && enemyTankClass.bulletData[enemyTankClass.bulletData.Count-1]!=null)
-            {
-                if(bulletAmount < enemyTankClass.bulletData.Count)
+                Debug.Log(enemyTankClass.bulletData.Count);
+                if (enemyTankClass.bulletData.Count != 0)
                 {
-                    Instantiate(bulletPrefab, enemyTankClass.bulletData[enemyTankClass.bulletData.Count - 1].position, enemyTankClass.bulletData[enemyTankClass.bulletData.Count - 1].rotation);
+                    Debug.Log(enemyTankClass.bulletData[0].position);
                 }
+
+                //Send message to the chat Canvas if it isn't empty
+                if (enemyTankClass.message != string.Empty)
+                {
+                    message.text += "/n" + enemyTankClass.message;
+                }
+
+                //Instantiate enemy bullets
+                if (enemyTankClass.bulletData.Count > 0 && enemyTankClass.bulletData[enemyTankClass.bulletData.Count - 1] != null)
+                {
+                    if (bulletAmount < enemyTankClass.bulletData.Count)
+                    {
+                        Instantiate(bulletPrefab, enemyTankClass.bulletData[enemyTankClass.bulletData.Count - 1].position, enemyTankClass.bulletData[enemyTankClass.bulletData.Count - 1].rotation);
+                    }
+
+                }
+                bulletAmount = enemyTankClass.bulletData.Count;
+
+                //Win/Lose condition
+                if (tankInstances[1].GetComponentInChildren<TankControls>().GetHP() <= 0)
+                {
+                    winOrLose.text = "YOU WIN";
+                    tankInstances[0].GetComponent<TankControls>().isEnabled = false;
+                    restartEnabled = true;
+                }
+                else if(tankInstances[0].GetComponentInChildren<TankControls>().GetHP() <= 0)
+                {
+                    winOrLose.text = "YOU LOSE";
+                    tankInstances[0].GetComponent<TankControls>().isEnabled = false;
+                    restartEnabled = true;
+                }
+                else
+                {
+                    winOrLose.text = "";
+                }
+            }
+            if (Input.GetKey(KeyCode.R) && restartEnabled)
+            {
+                tankInstances[0].transform.position = spawn.transform.position;
                 
             }
-                bulletAmount = enemyTankClass.bulletData.Count;
         }
     }
     void Send()
@@ -196,6 +210,7 @@ public class CreateServer : MonoBehaviour
         while (true)
         {
             SerializeJson(myTankClass);
+
             if (!isFirstMessage) //wait until the message with the client IP is functioning.
             {
                 sendSocket.SendTo(mem.GetBuffer(), mem.GetBuffer().Length, SocketFlags.None, ipepClient2);
