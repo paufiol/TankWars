@@ -10,6 +10,7 @@ using System.IO;
 using UnityEngine.UI;
 using System.Linq;
 using System.Text.RegularExpressions;
+
 public class CreateServer : MonoBehaviour
 {
     public Text message;
@@ -47,7 +48,7 @@ public class CreateServer : MonoBehaviour
     
 
     // We create the class where we will store all the data of the tank
-    public class tankClass
+    class tankClass
     {
         public float hp;
         public Vector3 pos;
@@ -58,9 +59,11 @@ public class CreateServer : MonoBehaviour
         public string message; //Here we store messages sent
     }
 
-    public tankClass myTankClass;
-    public tankClass enemyTankClass;
 
+    [HideInInspector] public string inputMessage;
+
+    private tankClass myTankClass;
+    private tankClass enemyTankClass;
     
     //Tank and spawn
     public GameObject tankPrefab;
@@ -141,6 +144,7 @@ public class CreateServer : MonoBehaviour
             myTankClass.cannonRot = tankInstances[0].GetComponentInChildren<Transform>().Find("Cannon").rotation;
             myTankClass.hp = tankInstances[0].GetComponent<TankControls>().GetHP();
             myTankClass.cannonPos = tankInstances[0].GetComponentInChildren<Transform>().Find("Cannon").position;
+            myTankClass.message = inputMessage; // TODO
 
             //Update list of bullets
             myTankClass.bulletData = tankInstances[0].GetComponentInChildren<AimControls>().bulletData;
@@ -155,19 +159,6 @@ public class CreateServer : MonoBehaviour
                 tankInstances[1].GetComponentInChildren<Transform>().Find("Cannon").position = enemyTankClass.cannonPos;
                 tankInstances[1].GetComponentInChildren<TankControls>().SetHP(enemyTankClass.hp);
 
-
-
-                Debug.Log(enemyTankClass.bulletData.Count);
-                if (enemyTankClass.bulletData.Count != 0)
-                {
-                    Debug.Log(enemyTankClass.bulletData[0].position);
-                }
-
-                //Send message to the chat Canvas if it isn't empty
-                if (enemyTankClass.message != string.Empty)
-                {
-                    message.text += "/n" + enemyTankClass.message;
-                }
 
                 //Instantiate enemy bullets
                 if (enemyTankClass.bulletData.Count > 0 && enemyTankClass.bulletData[enemyTankClass.bulletData.Count - 1] != null)
@@ -270,6 +261,7 @@ public class CreateServer : MonoBehaviour
         writer.Write(json);
         //Debug.Log("Serialized");
     }
+
     private void OnApplicationQuit()
     {
         //Socket & Thread CleanUp

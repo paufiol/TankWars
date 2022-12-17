@@ -156,11 +156,12 @@ public class JoinServer : MonoBehaviour
                 tankInstances[1].GetComponentInChildren<Transform>().Find("Cannon").position = hostTankClass.cannonPos;
                 tankInstances[1].GetComponentInChildren<TankControls>().SetHP(hostTankClass.hp);
 
-                //Send message to the chat Canvas if it isn't empty
-                if (hostTankClass.message != string.Empty)
-                {
-                    message.text += "/n" + myTankClass.message;
-                }
+                //Send message to the chat Canvas if it isn't empty TODO
+                //if (hostTankClass.message != "")
+                //{
+                //    message.text += "\n- Host: " + myTankClass.message.ToString();
+
+                //}
 
                 //Instantiate enemy bullets
                 if (hostTankClass.bulletData.Count > 0 && hostTankClass.bulletData[hostTankClass.bulletData.Count - 1] != null)
@@ -171,6 +172,11 @@ public class JoinServer : MonoBehaviour
                     }
                 }
                 bulletAmount = hostTankClass.bulletData.Count;
+
+                if (hostTankClass.message.ToString() != "")
+                {
+                    Debug.Log(hostTankClass.message.ToString()); // LOG HERE
+                }
             }
 
             //Win/Lose condition
