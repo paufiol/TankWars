@@ -18,9 +18,7 @@ public class JoinServer : MonoBehaviour
     public Text ip;
     public Canvas canvasJoin;
     public Canvas textCanvas;
-
-    public Canvas CanvasHost;
-    public Canvas CanvasClient;
+    public Text winOrLose;
 
     public Socket sendSocket;
     public Socket recSocket;
@@ -71,11 +69,12 @@ public class JoinServer : MonoBehaviour
 
     private int bulletAmount = 0;
 
+    private bool restartInitiated;
+
     void Start()
     {
+        restartInitiated = false;
         textCanvas.GetComponent<Canvas>().enabled = false;
-        CanvasHost.GetComponent<Canvas>().enabled = false;
-        CanvasClient.GetComponent<Canvas>().enabled = false;
     }
 
     public void Join()
@@ -140,46 +139,46 @@ public class JoinServer : MonoBehaviour
             myTankClass.cannonPos = tankInstances[0].GetComponentInChildren<Transform>().Find("Cannon").position;
             myTankClass.hp = tankInstances[0].GetComponent<TankControls>().GetHP();
 
-
             //Update list of bullets
             myTankClass.bulletData = tankInstances[0].GetComponentInChildren<AimControls>().bulletData;
-
-            //for (int i = 0; i < myTankClass.bulletInstances.Count; i++)
-            //{
-            //    myTankClass.bulletInstances[i] = tankInstances[0].GetComponentInChildren<AimControls>().bulletInstances[i];
-            //}
-
-            //VictoryScreen when a tank dies
-            if (tankInstances[0].GetComponent<TankControls>().GetHP() <= 0)
+        
+            if (jsonHost != null)
             {
-                CanvasClient.GetComponent<Canvas>().enabled = true;
-            }
-            else if (tankInstances[1].GetComponent<TankControls>().GetHP() <= 0)
-            {
-                CanvasHost.GetComponent<Canvas>().enabled = true;
-            }
+                hostTankClass = JsonUtility.FromJson<tankClass>(jsonHost);
 
-        }
-        if (jsonHost != null)
-        {
-            hostTankClass = JsonUtility.FromJson<tankClass>(jsonHost);
+                //Debug.Log(enemyTank.pos.ToString());
+                Vector3 newPos = new Vector3(hostTankClass.pos.x, hostTankClass.pos.y, hostTankClass.pos.z);
+                tankInstances[1].transform.position = newPos;
+                tankInstances[1].GetComponentInChildren<Transform>().Find("Cannon").rotation = hostTankClass.cannonRot;
+                tankInstances[1].GetComponentInChildren<Transform>().Find("Cannon").position = hostTankClass.cannonPos;
+                tankInstances[1].GetComponentInChildren<TankControls>().SetHP(hostTankClass.hp);
 
-            //Debug.Log(enemyTank.pos.ToString());
-            Vector3 newPos = new Vector3(hostTankClass.pos.x, hostTankClass.pos.y, hostTankClass.pos.z);
-            tankInstances[1].transform.position = newPos;
-            tankInstances[1].GetComponentInChildren<Transform>().Find("Cannon").rotation = hostTankClass.cannonRot;
-            tankInstances[1].GetComponentInChildren<Transform>().Find("Cannon").position = hostTankClass.cannonPos;
-            tankInstances[1].GetComponentInChildren<TankControls>().SetHP(hostTankClass.hp);
-
-            //Instantiate enemy bullets
-            if (hostTankClass.bulletData.Count > 0 && hostTankClass.bulletData[hostTankClass.bulletData.Count - 1] != null)
-            {
-                if (bulletAmount < hostTankClass.bulletData.Count)
+                //Instantiate enemy bullets
+                if (hostTankClass.bulletData.Count > 0 && hostTankClass.bulletData[hostTankClass.bulletData.Count - 1] != null)
                 {
-                    Instantiate(bulletPrefab, hostTankClass.bulletData[hostTankClass.bulletData.Count - 1].position, hostTankClass.bulletData[hostTankClass.bulletData.Count - 1].rotation);
+                    if (bulletAmount < hostTankClass.bulletData.Count)
+                    {
+                        Instantiate(bulletPrefab, hostTankClass.bulletData[hostTankClass.bulletData.Count - 1].position, hostTankClass.bulletData[hostTankClass.bulletData.Count - 1].rotation);
+                    }
                 }
+                bulletAmount = hostTankClass.bulletData.Count;
             }
-            bulletAmount = hostTankClass.bulletData.Count;
+
+            //Win/Lose condition
+            if (tankInstances[1].GetComponentInChildren<TankControls>().GetHP() <= 0)
+            {
+                winOrLose.text = "YOU WIN";
+                tankInstances[0].GetComponent<TankControls>().isEnabled = false;
+            }
+            else if (tankInstances[0].GetComponentInChildren<TankControls>().GetHP() <= 0)
+            {
+                winOrLose.text = "YOU LOSE";
+                tankInstances[0].GetComponent<TankControls>().isEnabled = false;
+            }
+            else
+            {
+                winOrLose.text = "";
+            }
         }
     }
 

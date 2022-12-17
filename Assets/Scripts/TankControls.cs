@@ -22,6 +22,7 @@ public class TankControls : MonoBehaviour
     {
         healthBar.UpdateHealthBar(maxHealth, currentHealth);
 
+        
         if (isEnabled)
         {
             float inputX = Input.GetAxis("Horizontal");
@@ -29,6 +30,11 @@ public class TankControls : MonoBehaviour
             Vector2 movement = new Vector2(1f * inputX, 0);
             movement *= Time.deltaTime;
             transform.Translate(movement);
+        }
+
+        if (currentHealth<=0)
+        {
+            isEnabled = false;
         }
     }
 
