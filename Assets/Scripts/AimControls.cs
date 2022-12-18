@@ -29,10 +29,15 @@ public class AimControls : MonoBehaviour
         {
             if (Input.GetKey(KeyCode.A))
             {
-                transform.RotateAround(tank.transform.position, Vector3.forward, 40f * Time.deltaTime);
+                Vector3 newtankpos = new Vector3(tank.transform.position.x, tank.transform.position.y + 0.15f, tank.transform.position.z);
+                transform.RotateAround(newtankpos, Vector3.forward, 40f * Time.deltaTime);
             }
             else if (Input.GetKey(KeyCode.D))
-                transform.RotateAround(tank.transform.position, -Vector3.forward, 40f * Time.deltaTime);
+            {
+                Vector3 newtankpos = new Vector3(tank.transform.position.x, tank.transform.position.y + 0.15f, tank.transform.position.z);
+                transform.RotateAround(newtankpos, -Vector3.forward, 40f * Time.deltaTime);
+            }
+                
 
             if (Input.GetKey(KeyCode.Space) && Time.time > nextShot)
             {

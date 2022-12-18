@@ -116,7 +116,9 @@ public class JoinServer : MonoBehaviour
         GameObject joinTank = (GameObject)Instantiate(tankPrefab, spawn.transform.position,
             transform.rotation);
         SpriteRenderer sprite = joinTank.GetComponent<SpriteRenderer>();
+        SpriteRenderer sprite2 = joinTank.GetComponentInChildren<SpriteRenderer>();
         sprite.color = Color.red;
+        sprite2.color = Color.red;
         tankInstances.Add(joinTank);
 
         // Create the tank that will be controled by the host

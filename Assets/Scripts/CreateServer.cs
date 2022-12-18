@@ -125,7 +125,9 @@ public class CreateServer : MonoBehaviour
         // Create the tank that will be controled by the client
         GameObject clientTank = (GameObject)Instantiate(tankPrefab, enemySpawn.transform.position, transform.rotation);
         SpriteRenderer sprite = clientTank.GetComponent<SpriteRenderer>();
+        SpriteRenderer sprite2 = clientTank.GetComponentInChildren<SpriteRenderer>();
         sprite.color = Color.red;
+        sprite2.color = Color.red;
 
         tankInstances.Add(clientTank);
     }
