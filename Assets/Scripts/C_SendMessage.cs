@@ -3,25 +3,23 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-
-public class SendMessageHost : MonoBehaviour
+public class C_SendMessage : MonoBehaviour
 {
     public Text message; // input text
     public Text chat; // text that will appear on screen
 
-    public CreateServer host;
+    public JoinServer client;
 
-    public void Send()
+    public void C_Send()
     {
         if (message.text.Length > 0)
         {
-            Debug.Log("im sending a message");
             //Write in your own local chat
-            string temp = "\n- Host (me): " + message.text;
+            string temp = "\n- Client (me): " + message.text;
             chat.text += temp;
 
-            //Send to client
-            host.inputMessage = message.text;
+            //Send to Host
+            client.inputMessage = message.text;
         }
     }
 }
