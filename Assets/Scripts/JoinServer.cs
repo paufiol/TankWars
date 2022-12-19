@@ -12,20 +12,24 @@ using System.Linq;
 
 public class JoinServer : MonoBehaviour
 {
-    public Text message;
-
+    public Text message; // The chat
+    [HideInInspector] public string inputMessage; // Here we store the string that the user enters
+    private string helperString; // What this string does is the following: when the host sends a chat message, the client first prints it on screen,
+                                 // then equals the message to this string. It will only print it on chat if the received string is different than this one.
+    [HideInInspector] public bool sendClientInfo = false;
+    // UI
     public Text username;
     public Text ip;
     public Canvas canvasJoin;
     public Canvas textCanvas;
     public Text winOrLose;
 
+    // Sockets stuff
+
     public Socket sendSocket;
     public Socket recSocket;
     private int port = 5631;
     private int port2 = 5655;
-
-    // Sockets stuff
 
     [HideInInspector] public EndPoint ipepServer;
     [HideInInspector] public EndPoint ipepServer2;
@@ -51,7 +55,7 @@ public class JoinServer : MonoBehaviour
     private string jsonHost;
 
     // We create the class where we will store all the data of the tank to be turned into the smallest json possible
-    public class tankClass
+    public class Package
     {
         public float hp;
         public Vector3 pos;
@@ -63,8 +67,8 @@ public class JoinServer : MonoBehaviour
     }
 
     // create the needed classes
-    public tankClass hostTankClass;
-    public tankClass myTankClass;
+    public Package packageReceived;
+    public Package packageToSend;
 
     // Create a list where we will store the tanks
     private List<GameObject> tankInstances = new List<GameObject>();
@@ -82,8 +86,8 @@ public class JoinServer : MonoBehaviour
     public void Join()
     {
         data = new byte[1024];
-        hostTankClass = new tankClass();
-        myTankClass = new tankClass();
+        packageReceived = new Package();
+        packageToSend = new Package();
 
         string ipString = ip.text;
         string usernameString = "User has Joined: " + username.text;
@@ -108,7 +112,8 @@ public class JoinServer : MonoBehaviour
         recthread = new Thread(Rec);
         recthread.Start();
 
-        message.text = "Server joined";
+        message.text += "Server joined";
+        sendClientInfo = true;
         canvasJoin.GetComponent<Canvas>().enabled = false;
         textCanvas.GetComponent<Canvas>().enabled = true;
 
@@ -137,48 +142,11 @@ public class JoinServer : MonoBehaviour
             tankInstances[1].GetComponent<TankControls>().isEnabled = false;
 
             // Each frame we update the content of myTankClass
-            myTankClass.pos.x = tankInstances[0].transform.position.x;
-            myTankClass.pos.y = tankInstances[0].transform.position.y;
-            myTankClass.cannonRot = tankInstances[0].GetComponentInChildren<Transform>().Find("Cannon").rotation;
-            myTankClass.cannonPos = tankInstances[0].GetComponentInChildren<Transform>().Find("Cannon").position;
-            myTankClass.hp = tankInstances[0].GetComponent<TankControls>().GetHP();
+            UpdatePackage();
 
-            //Update list of bullets
-            myTankClass.bulletData = tankInstances[0].GetComponentInChildren<AimControls>().bulletData;
-        
             if (jsonHost != null)
             {
-                hostTankClass = JsonUtility.FromJson<tankClass>(jsonHost);
-
-
-                //Debug.Log(enemyTank.pos.ToString());
-                Vector3 newPos = new Vector3(hostTankClass.pos.x, hostTankClass.pos.y, hostTankClass.pos.z);
-                tankInstances[1].transform.position = newPos;
-                tankInstances[1].GetComponentInChildren<Transform>().Find("Cannon").rotation = hostTankClass.cannonRot;
-                tankInstances[1].GetComponentInChildren<Transform>().Find("Cannon").position = hostTankClass.cannonPos;
-                tankInstances[1].GetComponentInChildren<TankControls>().SetHP(hostTankClass.hp);
-
-                //Send message to the chat Canvas if it isn't empty TODO
-                //if (hostTankClass.message != "")
-                //{
-                //    message.text += "\n- Host: " + myTankClass.message.ToString();
-
-                //}
-
-                //Instantiate enemy bullets
-                if (hostTankClass.bulletData.Count > 0 && hostTankClass.bulletData[hostTankClass.bulletData.Count - 1] != null)
-                {               
-                    if (bulletAmount < hostTankClass.bulletData.Count)
-                    {
-                        Instantiate(bulletPrefab, hostTankClass.bulletData[hostTankClass.bulletData.Count - 1].position, hostTankClass.bulletData[hostTankClass.bulletData.Count - 1].rotation);
-                    }
-                }
-                bulletAmount = hostTankClass.bulletData.Count;
-
-                if (hostTankClass.message.ToString() != "")
-                {
-                    Debug.Log(hostTankClass.message.ToString()); // LOG HERE
-                }
+                UpdateWorldState();
             }
 
             //Win/Lose condition
@@ -209,7 +177,7 @@ public class JoinServer : MonoBehaviour
         while (true)
         {
             // Serialize and send the data inside tankClass
-            SerializeJson(myTankClass);
+            SerializeJson(packageToSend);
             sendSocket.SendTo(mem.GetBuffer(), mem.GetBuffer().Length, SocketFlags.None, ipepServer);
             //Debug.Log("Message sent: " + myTankClass.hp.ToString() + "POS " + myTankClass.pos.x.ToString() + " " + myTankClass.pos.y.ToString() + "Turret Rot:" + myTankClass.rot.ToString());
 
@@ -234,7 +202,65 @@ public class JoinServer : MonoBehaviour
         }
     }
 
-    void SerializeJson(tankClass a)
+    void UpdatePackage()
+    {
+        // Each frame we update the content of myTankClass
+        packageToSend.pos.x = tankInstances[0].transform.position.x;
+        packageToSend.pos.y = tankInstances[0].transform.position.y;
+        packageToSend.cannonRot = tankInstances[0].GetComponentInChildren<Transform>().Find("Cannon").rotation;
+        packageToSend.cannonPos = tankInstances[0].GetComponentInChildren<Transform>().Find("Cannon").position;
+        packageToSend.hp = tankInstances[0].GetComponent<TankControls>().GetHP();
+
+        //if (sendClientInfo)
+        //{
+        //    packageToSend = username.text;
+        //    sendClientInfo = false;
+        //}
+        //else
+        //{
+            packageToSend.message = inputMessage;
+        //}
+
+        //Update list of bullets
+        packageToSend.bulletData = tankInstances[0].GetComponentInChildren<AimControls>().bulletData;
+
+    }
+
+    void UpdateWorldState()
+    {
+        packageReceived = JsonUtility.FromJson<Package>(jsonHost);
+
+        //Debug.Log(enemyTank.pos.ToString());
+        Vector3 newPos = new Vector3(packageReceived.pos.x, packageReceived.pos.y, packageReceived.pos.z);
+        tankInstances[1].transform.position = newPos;
+        tankInstances[1].GetComponentInChildren<Transform>().Find("Cannon").rotation = packageReceived.cannonRot;
+        tankInstances[1].GetComponentInChildren<Transform>().Find("Cannon").position = packageReceived.cannonPos;
+        tankInstances[1].GetComponentInChildren<TankControls>().SetHP(packageReceived.hp);
+
+        //Send message to the chat Canvas if it isn't empty
+        if (packageReceived.message != string.Empty && packageReceived.message.ToString() != helperString)
+        {
+            message.text += "\n- Host: " + packageReceived.message.ToString();
+            helperString = packageReceived.message;
+
+        }
+
+        //Instantiate enemy bullets
+        if (packageReceived.bulletData.Count > 0 && packageReceived.bulletData[packageReceived.bulletData.Count - 1] != null)
+        {
+            if (bulletAmount < packageReceived.bulletData.Count)
+            {
+                Instantiate(bulletPrefab, packageReceived.bulletData[packageReceived.bulletData.Count - 1].position, packageReceived.bulletData[packageReceived.bulletData.Count - 1].rotation);
+            }
+        }
+        bulletAmount = packageReceived.bulletData.Count;
+
+        if (packageReceived.message.ToString() != "")
+        {
+            Debug.Log(packageReceived.message.ToString());
+        }
+    }
+    void SerializeJson(Package a)
     {
         mem = new MemoryStream();
         string json = JsonUtility.ToJson(a);
@@ -243,16 +269,6 @@ public class JoinServer : MonoBehaviour
     }
     private void OnApplicationQuit()
     {
-        if (sendSocket != null)
-        {
-            sendSocket.Close();
-            sendSocket = null;
-        }
-        if (recSocket != null)
-        {
-            recSocket.Close();
-            recSocket = null;
-        }
         if (recthread != null)
         {
             recthread.Abort();
@@ -263,6 +279,17 @@ public class JoinServer : MonoBehaviour
             sendthread.Abort();
             sendthread = null;
         }
+        if (sendSocket != null)
+        {
+            sendSocket.Close();
+            sendSocket = null;
+        }
+        if (recSocket != null)
+        {
+            recSocket.Close();
+            recSocket = null;
+        }
+    
     }
     public string GetLocalIPv4()
     {
