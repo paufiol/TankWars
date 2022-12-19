@@ -501,7 +501,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 55.996002, y: 390}
+  m_AnchoredPosition: {x: 19.5, y: 368}
   m_SizeDelta: {x: 390.00403, y: 22.526516}
   m_Pivot: {x: 0, y: 0}
 --- !u!1 &277872006
@@ -2093,7 +2093,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -430.3, y: 57}
+  m_AnchoredPosition: {x: -356.3, y: 61}
   m_SizeDelta: {x: 209.40775, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1168144596
@@ -2665,7 +2665,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -233, y: 57}
+  m_AnchoredPosition: {x: -391, y: -210}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1482723386
@@ -2682,7 +2682,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   message: {fileID: 1185491177}
   chat: {fileID: 181292881}
-  client: {fileID: 0}
+  client: {fileID: 277872008}
 --- !u!114 &1482723387
 MonoBehaviour:
   m_ObjectHideFlags: 0
