@@ -16,6 +16,7 @@ public class JoinServer : MonoBehaviour
     [HideInInspector] public string inputMessage; // Here we store the string that the user enters
     private string helperString; // What this string does is the following: when the host sends a chat message, the client first prints it on screen,
                                  // then equals the message to this string. It will only print it on chat if the received string is different than this one.
+    [HideInInspector] public bool sendClientInfo = false;
     // UI
     public Text username;
     public Text ip;
@@ -112,6 +113,7 @@ public class JoinServer : MonoBehaviour
         recthread.Start();
 
         message.text += "Server joined";
+        sendClientInfo = true;
         canvasJoin.GetComponent<Canvas>().enabled = false;
         textCanvas.GetComponent<Canvas>().enabled = true;
 
@@ -209,7 +211,15 @@ public class JoinServer : MonoBehaviour
         packageToSend.cannonPos = tankInstances[0].GetComponentInChildren<Transform>().Find("Cannon").position;
         packageToSend.hp = tankInstances[0].GetComponent<TankControls>().GetHP();
 
-        packageToSend.message = inputMessage;
+        //if (sendClientInfo)
+        //{
+        //    packageToSend = username.text;
+        //    sendClientInfo = false;
+        //}
+        //else
+        //{
+            packageToSend.message = inputMessage;
+        //}
 
         //Update list of bullets
         packageToSend.bulletData = tankInstances[0].GetComponentInChildren<AimControls>().bulletData;
@@ -259,16 +269,6 @@ public class JoinServer : MonoBehaviour
     }
     private void OnApplicationQuit()
     {
-        if (sendSocket != null)
-        {
-            sendSocket.Close();
-            sendSocket = null;
-        }
-        if (recSocket != null)
-        {
-            recSocket.Close();
-            recSocket = null;
-        }
         if (recthread != null)
         {
             recthread.Abort();
@@ -279,6 +279,17 @@ public class JoinServer : MonoBehaviour
             sendthread.Abort();
             sendthread = null;
         }
+        if (sendSocket != null)
+        {
+            sendSocket.Close();
+            sendSocket = null;
+        }
+        if (recSocket != null)
+        {
+            recSocket.Close();
+            recSocket = null;
+        }
+    
     }
     public string GetLocalIPv4()
     {
