@@ -235,6 +235,8 @@ public class CreateServer : MonoBehaviour
 
     void UpdatePackage()
     {
+        
+
         packageToSend.pos.x = tankInstances[0].transform.position.x;
         packageToSend.pos.y = tankInstances[0].transform.position.y;
         packageToSend.cannonRot = tankInstances[0].GetComponentInChildren<Transform>().Find("Cannon").rotation;
@@ -244,12 +246,20 @@ public class CreateServer : MonoBehaviour
         Debug.Log("Updating package");
 
         //Update list of bullets
+        if(tankInstances[0].GetComponentInChildren<AimControls>().shotUpdateNeeded)
+        {
+            
+            packageToSend.bulletData = tankInstances[0].GetComponentInChildren<AimControls>().bulletData;
+            tankInstances[0].GetComponentInChildren<AimControls>().shotUpdateNeeded = false;
+        }
         
-        packageToSend.bulletData = tankInstances[0].GetComponentInChildren<AimControls>().bulletData;
-        
-        
-        if(tankInstances[0].GetComponentInChildren<AimControls>().bulletData.Count>0)
-        { Debug.Log("What I send: " + tankInstances[0].GetComponentInChildren<AimControls>().bulletData[0].position); }
+
+
+        if (tankInstances[0].GetComponentInChildren<AimControls>().bulletData.Count>0)
+        {
+            Debug.Log("Size check: " + tankInstances[0].GetComponentInChildren<AimControls>().bulletData.Count());
+            Debug.Log("What I send: " + tankInstances[0].GetComponentInChildren<AimControls>().bulletData[0].position);
+        }
         
     }
 

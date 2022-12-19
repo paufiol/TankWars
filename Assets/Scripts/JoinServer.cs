@@ -222,7 +222,12 @@ public class JoinServer : MonoBehaviour
         //}
 
         //Update list of bullets
-        packageToSend.bulletData = tankInstances[0].GetComponentInChildren<AimControls>().bulletData;
+        if (tankInstances[0].GetComponentInChildren<AimControls>().shotUpdateNeeded)
+        {
+
+            packageToSend.bulletData = tankInstances[0].GetComponentInChildren<AimControls>().bulletData;
+            tankInstances[0].GetComponentInChildren<AimControls>().shotUpdateNeeded = false;
+        }
 
     }
 

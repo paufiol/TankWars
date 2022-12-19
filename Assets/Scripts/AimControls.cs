@@ -13,6 +13,7 @@ public class AimControls : MonoBehaviour
     public List<BulletInfo> bulletData = new List<BulletInfo>();
     private List<GameObject> bulletList = new List<GameObject>();
     public bool shotFired = false;
+    [HideInInspector] public bool shotUpdateNeeded = false;
 
     [System.Serializable]
     public class BulletInfo
@@ -43,6 +44,7 @@ public class AimControls : MonoBehaviour
             if (Input.GetKey(KeyCode.Space) && Time.time > nextShot)
             {
                 ProjectileShoot();
+                shotUpdateNeeded = true;
             }
         }
         ManageBulletList();
@@ -61,7 +63,7 @@ public class AimControls : MonoBehaviour
 
         bulletList.Add(projectileGO);
         bulletData.Add(bullet);
-
+        Debug.Log("Test: " + bullet.position);
 
         Debug.Log(bullet.position);
         Debug.Log(bullet.rotation);
@@ -87,9 +89,10 @@ public class AimControls : MonoBehaviour
                 bulletList.RemoveAt(bulletList.Count - 1);
 
                 bulletData[i] = bulletData[bulletData.Count - 1];
-                bulletData.RemoveAt(bulletData.Count - 1); 
+                bulletData.RemoveAt(bulletData.Count - 1);
+                shotUpdateNeeded = true;
             }
-            Debug.Log("Managed info:" + bulletList[i].transform.position);
+            //Debug.Log("Managed info:" + bulletList[i].transform.position);
         }
     }
 }
