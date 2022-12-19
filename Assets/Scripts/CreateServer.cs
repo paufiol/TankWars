@@ -22,8 +22,6 @@ public class CreateServer : MonoBehaviour
     [HideInInspector] public string inputMessage; // Here we store the string that the user enters
     private string helperString; // What this string does is the following: when the host sends a chat message, the host first prints it on screen,
                                  // then equals the message to this string. (if this != inputMessage)
-    private bool printClientInfo = false;
-    private string clientInfo;
 
     // Sockets stuff
 
@@ -207,18 +205,16 @@ public class CreateServer : MonoBehaviour
                 clientIP = Encoding.ASCII.GetString(data);
 
                 Debug.Log("client IP: "+ clientIP);
-                clientInfo = "\n Has joined client with IP: " + clientIP; // Should change it to name
                 clientIP = Regex.Replace(clientIP, "\0", "");
 
                 IPEndPoint ipep2 = new IPEndPoint(IPAddress.Parse(clientIP), port2);
                 ipepClient2 = (EndPoint)ipep2;
 
-                printClientInfo = true;
                 isFirstMessage = false;
             }
             else
             {
-                MemoryStream stream = new MemoryStream(data);
+                MemoryStream stream = new MemoryStream(data); // THIS MEANS, THE FIRST PACKAGE IS 'LOST'
                 BinaryReader reader = new BinaryReader(stream);
                 stream.Seek(0, SeekOrigin.Begin);
                 jsonClient = reader.ReadString();
@@ -235,15 +231,12 @@ public class CreateServer : MonoBehaviour
 
     void UpdatePackage()
     {
-        
-
         packageToSend.pos.x = tankInstances[0].transform.position.x;
         packageToSend.pos.y = tankInstances[0].transform.position.y;
         packageToSend.cannonRot = tankInstances[0].GetComponentInChildren<Transform>().Find("Cannon").rotation;
         packageToSend.hp = tankInstances[0].GetComponent<TankControls>().GetHP();
         packageToSend.cannonPos = tankInstances[0].GetComponentInChildren<Transform>().Find("Cannon").position;
         packageToSend.message = inputMessage;
-        Debug.Log("Updating package");
 
         //Update list of bullets
         if(tankInstances[0].GetComponentInChildren<AimControls>().shotUpdateNeeded)
@@ -253,14 +246,11 @@ public class CreateServer : MonoBehaviour
             tankInstances[0].GetComponentInChildren<AimControls>().shotUpdateNeeded = false;
         }
         
-
-
         if (tankInstances[0].GetComponentInChildren<AimControls>().bulletData.Count>0)
         {
             Debug.Log("Size check: " + tankInstances[0].GetComponentInChildren<AimControls>().bulletData.Count());
             Debug.Log("What I send: " + tankInstances[0].GetComponentInChildren<AimControls>().bulletData[0].position);
         }
-        
     }
 
     void UpdateWorldState()
@@ -273,16 +263,14 @@ public class CreateServer : MonoBehaviour
         tankInstances[1].GetComponentInChildren<Transform>().Find("Cannon").position = packageToReceive.cannonPos;
         tankInstances[1].GetComponentInChildren<TankControls>().SetHP(packageToReceive.hp);
 
-        //if(printClientInfo)
-        //{
-        //    message.text += clientInfo;
-        //    printClientInfo = false;
-        //}
-
         //Send message to the chat Canvas if it isn't empty
         if (packageToReceive.message != string.Empty && packageToReceive.message.ToString() != helperString)
         {
-            message.text += "\n- Client: " + packageToReceive.message.ToString(); // Does this work?
+            Debug.Log(packageToReceive.message);
+
+            string temp = "\n " + packageToReceive.message;
+            message.text += temp;
+
             helperString = packageToReceive.message;
         }
 
@@ -317,17 +305,7 @@ public class CreateServer : MonoBehaviour
 
     private void OnApplicationQuit()
     {
-        //Socket & Thread CleanUp
-        if (recSocket != null)
-        {
-            recSocket.Close();
-            recSocket = null;
-        }
-        if (sendSocket != null)
-        {
-            sendSocket.Close();
-            sendSocket = null;
-        }
+        //Socket & Thread CleanUp (Thread first so it doesnt try to use a closed socket)
         if (recthread != null)
         {
             recthread.Abort();
@@ -338,5 +316,17 @@ public class CreateServer : MonoBehaviour
             sendthread.Abort();
             sendthread = null;
         }
+
+        if (recSocket != null)
+        {
+            recSocket.Close();
+            recSocket = null;
+        }
+        if (sendSocket != null)
+        {
+            sendSocket.Close();
+            sendSocket = null;
+        }
+
     }
 }

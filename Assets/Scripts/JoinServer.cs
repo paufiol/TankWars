@@ -13,10 +13,13 @@ using System.Linq;
 public class JoinServer : MonoBehaviour
 {
     public Text message; // The chat
-    [HideInInspector] public string inputMessage; // Here we store the string that the user enters
+    [HideInInspector] public string inputMessage = "0"; // Here we store the string that the user enters
     private string helperString; // What this string does is the following: when the host sends a chat message, the client first prints it on screen,
                                  // then equals the message to this string. It will only print it on chat if the received string is different than this one.
     [HideInInspector] public bool sendClientInfo = false;
+
+    int frameCount = 0; // What UDP does to a code
+
     // UI
     public Text username;
     public Text ip;
@@ -35,7 +38,7 @@ public class JoinServer : MonoBehaviour
     [HideInInspector] public EndPoint ipepServer2;
 
     [HideInInspector] public string recData;
-    [HideInInspector] public bool recTrue = false;
+    [HideInInspector] public bool recTrue = true;
 
     [HideInInspector] public bool messageSent = false;
 
@@ -81,6 +84,7 @@ public class JoinServer : MonoBehaviour
     {
         restartInitiated = false;
         textCanvas.GetComponent<Canvas>().enabled = false;
+        sendClientInfo = true;
     }
 
     public void Join()
@@ -113,7 +117,7 @@ public class JoinServer : MonoBehaviour
         recthread.Start();
 
         message.text += "Server joined";
-        sendClientInfo = true;
+
         canvasJoin.GetComponent<Canvas>().enabled = false;
         textCanvas.GetComponent<Canvas>().enabled = true;
 
@@ -211,15 +215,20 @@ public class JoinServer : MonoBehaviour
         packageToSend.cannonPos = tankInstances[0].GetComponentInChildren<Transform>().Find("Cannon").position;
         packageToSend.hp = tankInstances[0].GetComponent<TankControls>().GetHP();
 
-        //if (sendClientInfo)
-        //{
-        //    packageToSend = username.text;
-        //    sendClientInfo = false;
-        //}
-        //else
-        //{
+        frameCount++;
+        if (frameCount < 5) // The first package sent is only for the IP, and sometimes the second does not arrive. UDP kinda bad
+        {
+            string temp = username.text + " has joined!";
+            packageToSend.message = temp;
+            //sendClientInfo = false;
+            Debug.Log(packageToSend.message);
+            Debug.Log(temp);
+        }
+        else if (frameCount > 5)
+        {
             packageToSend.message = inputMessage;
-        //}
+
+        }
 
         //Update list of bullets
         if (tankInstances[0].GetComponentInChildren<AimControls>().shotUpdateNeeded)
