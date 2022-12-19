@@ -25,7 +25,8 @@ public class AimControls : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(GetComponentInParent<TankControls>().isEnabled)
+
+        if (GetComponentInParent<TankControls>().isEnabled)
         {
             if (Input.GetKey(KeyCode.A))
             {
@@ -61,6 +62,10 @@ public class AimControls : MonoBehaviour
         bulletList.Add(projectileGO);
         bulletData.Add(bullet);
 
+
+        Debug.Log(bullet.position);
+        Debug.Log(bullet.rotation);
+
         //Bullet cooldown
         nextShot = Time.time + cooldown;
 
@@ -74,7 +79,7 @@ public class AimControls : MonoBehaviour
         {
             if (bulletList[i] != null)
             {
-                //Do stuff
+                
             }
             else
             {
@@ -84,6 +89,7 @@ public class AimControls : MonoBehaviour
                 bulletData[i] = bulletData[bulletData.Count - 1];
                 bulletData.RemoveAt(bulletData.Count - 1); 
             }
+            Debug.Log("Managed info:" + bulletList[i].transform.position);
         }
     }
 }

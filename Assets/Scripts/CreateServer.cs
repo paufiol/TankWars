@@ -244,7 +244,13 @@ public class CreateServer : MonoBehaviour
         Debug.Log("Updating package");
 
         //Update list of bullets
+        
         packageToSend.bulletData = tankInstances[0].GetComponentInChildren<AimControls>().bulletData;
+        
+        
+        if(tankInstances[0].GetComponentInChildren<AimControls>().bulletData.Count>0)
+        { Debug.Log("What I send: " + tankInstances[0].GetComponentInChildren<AimControls>().bulletData[0].position); }
+        
     }
 
     void UpdateWorldState()
