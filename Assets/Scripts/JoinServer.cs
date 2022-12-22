@@ -67,6 +67,7 @@ public class JoinServer : MonoBehaviour
         public List<AimControls.BulletInfo> bulletData = new List<AimControls.BulletInfo>();
 
         public string message; //Here we store messages sent
+        public bool isRestarting = false; //Used for game loop communication
     }
 
     // create the needed classes
@@ -153,6 +154,18 @@ public class JoinServer : MonoBehaviour
                 UpdateWorldState();
             }
 
+            if (packageReceived.isRestarting)
+            {
+                tankInstances[0].transform.position = spawn.transform.position;
+                tankInstances[0].GetComponent<TankControls>().SetHP(100);
+                tankInstances[0].GetComponentInChildren<AimControls>().bulletData.Clear();
+                packageToSend.isRestarting = true;
+            }
+            else
+            {
+                packageToSend.isRestarting = false;
+            }
+
             //Win/Lose condition
             if (tankInstances[1].GetComponentInChildren<TankControls>().GetHP() <= 0)
             {
@@ -166,8 +179,11 @@ public class JoinServer : MonoBehaviour
             }
             else
             {
+                tankInstances[0].GetComponent<TankControls>().isEnabled = true;
                 winOrLose.text = "";
             }
+
+            
         }
     }
 

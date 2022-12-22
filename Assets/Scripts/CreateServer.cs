@@ -65,6 +65,7 @@ public class CreateServer : MonoBehaviour
 
         // Other
         public string message; // Here we store messages that we want to send
+        public bool isRestarting = false; //Used for game loop communication
     }
 
 
@@ -84,12 +85,10 @@ public class CreateServer : MonoBehaviour
 
     // For the restart
     private bool restartEnabled;
-    private bool hasRestarted;
 
     void Start()
     {
         restartEnabled = false;
-        hasRestarted = false;
         textCanvas.GetComponent<Canvas>().enabled = false;
     }
 
@@ -147,8 +146,22 @@ public class CreateServer : MonoBehaviour
             //Disable 2nd tank controls
             tankInstances[1].GetComponent<TankControls>().isEnabled = false;
 
+            if (Input.GetKey(KeyCode.R) && restartEnabled)
+            {
+                tankInstances[0].transform.position = spawn.transform.position;
+                tankInstances[0].GetComponent<TankControls>().SetHP(100);
+                tankInstances[0].GetComponentInChildren<AimControls>().bulletData.Clear();
+                restartEnabled = false;
+                packageToSend.isRestarting = true;
+            }
+
             // Each frame we update the content of myTankClass
             UpdatePackage();
+
+            if (packageToReceive.isRestarting)
+            {
+                packageToSend.isRestarting = false;
+            }
 
             if (jsonClient != null)
             {
@@ -170,14 +183,12 @@ public class CreateServer : MonoBehaviour
                 }
                 else
                 {
+                    tankInstances[0].GetComponent<TankControls>().isEnabled = true;
                     winOrLose.text = "";
+                    //packageToSend.isRestarting = false;
                 }
             }
-            if (Input.GetKey(KeyCode.R) && restartEnabled)
-            {
-                tankInstances[0].transform.position = spawn.transform.position;
-                
-            }
+            
         }
     }
     void Send()
